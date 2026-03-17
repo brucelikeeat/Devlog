@@ -1,14 +1,14 @@
 <div align="center">
 
-# BuildSignal
+# Devlog
 
 **Turn your code into content.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![GitHub Stars](https://img.shields.io/github/stars/yourusername/buildsignal?style=social)](https://github.com/yourusername/buildsignal)
+[![GitHub Stars](https://img.shields.io/github/stars/yourusername/devlog?style=social)](https://github.com/yourusername/devlog)
 
-BuildSignal is an AI-powered developer growth platform that automatically converts **GitHub development activity** into **high-quality social media content**.
+Devlog is an AI-powered developer growth platform that automatically converts **GitHub development activity** into **high-quality social media content**.
 
 [Getting Started](#installation) · [Features](#core-features) · [Architecture](#architecture-overview) · [Roadmap](#roadmap) · [Contributing](#contributing)
 
@@ -27,7 +27,7 @@ Many developers want to build in public but struggle with:
 
 ## The Solution
 
-BuildSignal analyzes your **commits, pull requests, releases, and milestones** — then automatically generates **platform-optimized posts** for X (Twitter), LinkedIn, Reddit, Indie Hackers, and developer blogs.
+Devlog analyzes your **commits, pull requests, releases, and milestones** — then automatically generates **platform-optimized posts** for X (Twitter), LinkedIn, Reddit, Indie Hackers, and developer blogs.
 
 ```
 Git commit → AI analysis → content generation → scheduled posting
@@ -104,7 +104,7 @@ Track content performance across platforms — engagement rate, follower growth,
 
 ## Product Vision
 
-BuildSignal aims to become the **developer distribution engine**.
+Devlog aims to become the **developer distribution engine**.
 
 ```
 GitHub → AI growth engine → audience → customers
@@ -173,8 +173,8 @@ Help developers grow audiences, acquire early users, build communities, and laun
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/buildsignal
-cd buildsignal
+git clone https://github.com/yourusername/devlog
+cd devlog
 
 # Install dependencies
 npm install
