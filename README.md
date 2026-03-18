@@ -312,6 +312,7 @@ Devlog will ship with a simple, pragmatic pricing model designed to balance adop
 | **Automatic Devlogs** | AI-generated weekly progress reports |
 | **Visual Content Generation** | Feature screenshots, product mockups, diagrams |
 | **Audience Discovery** | Identify potential users by interest, engagement, and topic relevance |
+| **Devlog → Docs Integration** | Export timeline entries into long-form documentation (e.g. wiki-style pages) for design notes, changelogs, and internal knowledge bases |
 
 ---
 
