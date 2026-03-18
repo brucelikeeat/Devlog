@@ -50,7 +50,7 @@ Build in public effortlessly. Stay focused on shipping product.
 
 ### GitHub Activity Intelligence
 
-Connects directly to your GitHub repository and monitors commits, pull requests, issues, releases, and milestone completions. The system identifies **meaningful product progress** rather than simple code changes.
+Connects directly to your GitHub repository and monitors commits, pull requests, issues, releases, and milestone completions. The system focuses on **meaningful product progress**, not raw code diffs – similar to how good bloggers or writers share outcomes and lessons rather than implementation details.
 
 ```
 Commit:    "Implemented startup scoring algorithm"
@@ -119,6 +119,16 @@ Per-repo privacy levels so you stay in control:
 - **Low** – best for open-source / public marketing; allows more specific feature mentions and links.
 
 Devlog never auto-posts without your review. You decide how much detail is revealed and where it is shared.
+
+### Outcome-Focused Storytelling
+
+Devlog is opinionated about what “good sharing” looks like. Inspired by creators like Zen Habits and personal bloggers, it focuses on:
+
+- Outcomes shipped (what changed for users)
+- Lessons learned (what you discovered)
+- Visible progress over time
+
+instead of exposing sensitive code or internal implementation details. You can choose to share **aggregated stats and high-level summaries** rather than specific changes.
 
 ### Developer Growth Analytics
 

@@ -42,6 +42,8 @@
 
 - Branding should emphasize **development journaling first**, promotion second. That framing reduces spammy vibes and aligns with the name “Devlog”.  
 - Privacy is not a “nice to have” – it’s core to adoption for any serious project or startup codebase. Repo-level privacy modes need to exist from early versions.  
+- A commenter made it clear that **privacy is the differentiator**: most devs are interested *if* they can tightly control what gets exposed (e.g. only safe commit messages or aggregated stats instead of specific code changes).  
+- Another insight: good dev storytelling is more like personal blogs (e.g. Zen Habits) – focused on **outcomes and lessons**, not code dumps. Devlog should help users talk about what changed and what they learned, not just what files they touched.  
 - There is real interest in using Devlog purely as an automatic **build diary**, even without cross-platform posting. That’s an important parallel use case.
 
 **Potential X post draft (not yet published)**
