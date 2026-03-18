@@ -184,14 +184,18 @@ Help developers grow audiences, acquire early users, build communities, and laun
 
 ## Tech Stack
 
+Devlog is built on a modern, industry-standard web stack that’s common across SaaS dashboards and developer tools.
+
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| **Frontend** | Next.js 14, React, TypeScript, TailwindCSS, ShadCN UI, Framer Motion | Dashboard, content editor, analytics, calendar UI |
-| **Backend** | Node.js, Express / Fastify, TypeScript | GitHub event processing, AI generation, API routing, platform integrations |
-| **AI** | OpenAI API, Anthropic API, local model support *(future)* | Commit summarization, post generation, tone adaptation, thread formatting |
-| **Database** | PostgreSQL | Users, repositories, generated posts, platform tokens, analytics |
-| **Queue** | Redis, BullMQ | AI job processing, scheduled posts, event pipelines |
-| **Infra** | Vercel, Railway / Fly.io, Supabase, Cloudflare | Frontend hosting, backend hosting, auth + database, edge security |
+| **Frontend** | **React**, **TypeScript**, **Next.js 14 (App Router)**, TailwindCSS, shadcn/ui, Framer Motion | Modern, responsive dashboard UI, content editor, analytics, calendar & timeline interactions |
+| **Backend** | **TypeScript / Node.js** (via Next.js API routes or a small Node service) | GitHub webhook handling, event processing, AI orchestration, API routing, platform integrations |
+| **AI** | OpenAI API, Anthropic API, local model support *(future)* | Commit summarization, outcome-focused narrative, multi-platform post generation, tone adaptation |
+| **Database** | PostgreSQL | Users, repositories, events, generated posts, privacy settings, analytics |
+| **Queue** | Redis, BullMQ *(or equivalent)* | Background AI job processing, scheduled posts, event pipelines |
+| **Infra** | Vercel, Railway / Fly.io, Supabase/Neon, Cloudflare | Frontend hosting, backend services, managed Postgres, auth, edge security |
+
+Python and FastAPI are also strong candidates for AI-heavy backend components in the future, but the initial product surface is optimized around the React + TypeScript + Next.js ecosystem that most modern dev tools use.
 
 ---
 
