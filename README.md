@@ -287,6 +287,43 @@ This keeps `main` clean for deployments while preserving a clear history of feat
 
 ---
 
+## Project Structure
+
+Devlog currently uses a **single-app structure** optimized for fast iteration, with a clean path to a future monorepo split if the backend grows significantly.
+
+```text
+docs/                 architecture, API contracts, decision records, agent coordination
+src/app/              Next.js routes and route handlers
+src/components/       reusable UI components
+src/features/         feature-level domains (github, timeline, privacy, post generation, etc.)
+src/lib/              shared helpers and infrastructure clients
+src/server/           server-only services, repositories, jobs, and schemas
+src/styles/           global styles
+src/types/            shared application types
+prisma/               database schema and migrations
+scripts/              local automation scripts
+tests/                unit and integration tests
+.github/workflows/    CI and automation workflows
+```
+
+### Agent coordination rule
+
+Every `feature/*` branch must update `docs/agent-worklog.md` in its first meaningful commit so each implementation chat can quickly understand:
+
+- what branch is active,
+- what area is being changed,
+- what files are expected to be touched,
+- and whether the work depends on any API or data model changes.
+
+Supporting docs:
+
+- `docs/architecture.md`
+- `docs/api-contracts.md`
+- `docs/agent-worklog.md`
+- `docs/decisions/`
+
+---
+
 ## MVP Scope
 
 The first release includes:
