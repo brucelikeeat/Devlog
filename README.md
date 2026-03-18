@@ -249,6 +249,40 @@ The app will be available at `http://localhost:3000`.
 
 ---
 
+## Git Workflow
+
+Devlog uses a simple, fast Git branching model optimized for solo builders and small teams.
+
+### Branches
+
+- `main` – always-deployable, stable branch. Production deployments should come from `main`.
+- `feature/*` – short-lived branches for specific pieces of work (features, fixes, experiments).
+
+### Typical workflow
+
+```bash
+# Create a new feature branch from main
+git checkout main
+git pull origin main
+git checkout -b feature/dev-timeline-ui
+
+# Commit your work on the feature branch
+git commit -am "feat: add basic dev timeline layout"
+
+# Push and open a pull request back into main
+git push origin feature/dev-timeline-ui
+```
+
+Guidelines:
+
+- Keep changes on `feature/*` branches focused and small.
+- Use descriptive branch names like `feature/github-integration`, `feature/privacy-settings`, `feature/dev-timeline-ui`.
+- Merge into `main` only when the feature is tested locally and does not break the app.
+
+This keeps `main` clean for deployments while preserving a clear history of feature work that Devlog itself can later turn into timeline entries and posts.
+
+---
+
 ## MVP Scope
 
 The first release includes:
