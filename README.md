@@ -315,6 +315,36 @@ Community features, developer leaderboard, automatic devlogs, visual content gen
 
 ---
 
+## Release Milestones
+
+Devlog will use simple semantic versioning to mark meaningful product stages.
+
+### v0.1.0 – Internal MVP
+
+- GitHub OAuth + repo selection for a single user.
+- Basic event capture from commits and/or pull requests.
+- Simple internal-only dev timeline UI with fake or minimal AI summaries.
+- No external users yet, used only by the maker to test core workflows.
+
+### v0.2.0 – Early Access (Friends & Testers)
+
+- Reliable GitHub event ingestion for selected repos.
+- AI-generated summaries for meaningful events (commit/PR → outcome-focused text).
+- Editable dev timeline entries and a first version of privacy levels (e.g., high vs medium).
+- Ability to generate draft posts for at least X and LinkedIn.
+- Onboarding that a small group of external testers can complete without hand-holding.
+
+### v1.0.0 – Public Launch
+
+- Stable GitHub integration with clear error handling and status.
+- Polished dev timeline and content calendar suitable for daily use.
+- Mature privacy controls, documented and easy to understand.
+- Multi-platform post generation with tone presets (X, LinkedIn, Reddit at minimum).
+- Basic analytics (consistency and top-performing posts) and a simple paid plan.
+- Public landing page, documentation, and GitHub release tagged `v1.0.0`.
+
+---
+
 ## Pricing (Planned)
 
 Devlog will ship with a simple, pragmatic pricing model designed to balance adoption and sustainability.
