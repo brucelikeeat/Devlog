@@ -1,0 +1,215 @@
+import type { TimelineEntry } from "./types";
+
+/**
+ * Fake timeline data representing Devlog's own development history.
+ * Sorted newest-first; grouped by date in the UI layer.
+ */
+export const TIMELINE_ENTRIES: TimelineEntry[] = [
+  // ── Mar 19 (Today) ─────────────────────────────────────────────────────────
+  {
+    id: "commit-scaffold-timeline",
+    type: "commit",
+    title: "Scaffold timeline feature components and TimelineView client wrapper",
+    summary:
+      "Created the full component architecture for the timeline feature: TimelineView, TimelineList, TimelineEntryCard, and TimelineFilters. Added the useTimelineFilter hook for client-side search and type filtering. The page is now a clean server component that passes data down.",
+    repo: "devlog",
+    branch: "feature/dev-timeline-ui",
+    dateIso: "2026-03-19T11:23:00Z",
+    displayTime: "Today, 11:23 AM",
+    hash: "a3f7c12",
+    filesChanged: 8,
+    additions: 394,
+    deletions: 187,
+    postStatus: "draft",
+  },
+  {
+    id: "commit-timeline-types",
+    type: "commit",
+    title: "Add TimelineEntry discriminated union types and rich fake data layer",
+    summary:
+      "Defined TypeScript discriminated unions for CommitEntry, PrEntry, and ReleaseEntry. Added 12 realistic fake timeline entries spanning five days of development to power the prototype UI. The data layer is ready to be swapped for real API responses.",
+    repo: "devlog",
+    branch: "feature/dev-timeline-ui",
+    dateIso: "2026-03-19T09:41:00Z",
+    displayTime: "Today, 9:41 AM",
+    hash: "b9e2a84",
+    filesChanged: 3,
+    additions: 112,
+    deletions: 0,
+    postStatus: null,
+  },
+
+  // ── Mar 18 ─────────────────────────────────────────────────────────────────
+  {
+    id: "pr-app-shell",
+    type: "pr",
+    title: "feature/app-shell → main",
+    summary:
+      "Merged the app shell feature branch containing the full authenticated app layout: fixed 240px sidebar with nav, repo selector, and user profile; sticky topbar with global search shortcut, notifications, and avatar; and the (app) route-group structure wrapping dashboard, timeline, and settings.",
+    repo: "devlog",
+    branch: "feature/app-shell",
+    dateIso: "2026-03-18T15:52:00Z",
+    displayTime: "Mar 18, 3:52 PM",
+    prNumber: 3,
+    state: "merged",
+    labels: ["ui", "feature"],
+    commits: 12,
+    filesChanged: 18,
+    postStatus: "published",
+  },
+  {
+    id: "commit-topbar",
+    type: "commit",
+    title: "Add sticky Topbar with global search shortcut, notifications, and avatar",
+    summary:
+      "Built the Topbar component: a cmd+K search shortcut button, a notification bell with an unread violet dot indicator, a visual divider, and a user avatar. Sticky at the top of every authenticated page via the (app) route-group layout.",
+    repo: "devlog",
+    branch: "feature/app-shell",
+    dateIso: "2026-03-18T13:17:00Z",
+    displayTime: "Mar 18, 1:17 PM",
+    hash: "d1c4e09",
+    filesChanged: 2,
+    additions: 98,
+    deletions: 12,
+    postStatus: null,
+  },
+  {
+    id: "commit-sidebar",
+    type: "commit",
+    title: "Build fixed Sidebar with navigation, repo selector, and user profile row",
+    summary:
+      "Implemented the 240px fixed sidebar: Devlog logo, dashed repo connection CTA, Workspace section label, main nav with active-state detection and Soon badges for upcoming features, a settings link at the bottom, and a user profile row showing name and plan.",
+    repo: "devlog",
+    branch: "feature/app-shell",
+    dateIso: "2026-03-18T10:05:00Z",
+    displayTime: "Mar 18, 10:05 AM",
+    hash: "e7b1f35",
+    filesChanged: 3,
+    additions: 142,
+    deletions: 8,
+    postStatus: "draft",
+  },
+
+  // ── Mar 17 ─────────────────────────────────────────────────────────────────
+  {
+    id: "commit-root-layout",
+    type: "commit",
+    title: "Configure root layout with Geist font variables and dark-mode base styles",
+    summary:
+      "Set up the Next.js root layout: GeistSans and GeistMono CSS custom properties applied to html, hardcoded dark class for consistent dark mode, zinc-950 background and zinc-100 text defaults, and global CSS additions including a thin custom scrollbar, violet selection highlight, dot-grid and hero-glow utility classes.",
+    repo: "devlog",
+    branch: "main",
+    dateIso: "2026-03-17T14:32:00Z",
+    displayTime: "Mar 17, 2:32 PM",
+    hash: "f2d8b61",
+    filesChanged: 2,
+    additions: 68,
+    deletions: 3,
+    postStatus: null,
+  },
+  {
+    id: "commit-scaffold-routes",
+    type: "commit",
+    title: "Scaffold authenticated route group with dashboard, timeline, and settings pages",
+    summary:
+      "Created the (app) route group with a shared layout wrapping the sidebar offset. Added placeholder pages: dashboard with stats grid and recent-activity feed, timeline with vertical spine and three entry types, and settings with five collapsible section cards. All pages use static data for now.",
+    repo: "devlog",
+    branch: "main",
+    dateIso: "2026-03-17T09:14:00Z",
+    displayTime: "Mar 17, 9:14 AM",
+    hash: "3a9c471",
+    filesChanged: 5,
+    additions: 312,
+    deletions: 0,
+    postStatus: null,
+  },
+
+  // ── Mar 16 ─────────────────────────────────────────────────────────────────
+  {
+    id: "release-v0.1.0",
+    type: "release",
+    title: "v0.1.0 — Project scaffolded",
+    summary:
+      "First milestone: the full project foundation is in place. Devlog has a working app shell, a marketing landing page, and a documented architecture ready for feature implementation to begin.",
+    repo: "devlog",
+    branch: "main",
+    dateIso: "2026-03-16T18:00:00Z",
+    displayTime: "Mar 16",
+    version: "v0.1.0",
+    highlights: [
+      "App shell with fixed sidebar and sticky topbar",
+      "Landing page with hero, features grid, and pricing CTA",
+      "Architecture docs, ADR-0001, and agent worklog established",
+      "Tailwind dark-mode design system with violet accent tokens",
+    ],
+    commits: 27,
+    postStatus: "published",
+  },
+  {
+    id: "pr-landing-page",
+    type: "pr",
+    title: "feature/landing-page → main",
+    summary:
+      "Merged the landing page branch. Includes the full Devlog marketing site: sticky navbar, hero section with terminal animation mockup showing the commit→AI→post pipeline, seven-card features grid, how-it-works steps, platform strip, and pricing CTA.",
+    repo: "devlog",
+    branch: "feature/landing-page",
+    dateIso: "2026-03-16T15:30:00Z",
+    displayTime: "Mar 16, 3:30 PM",
+    prNumber: 2,
+    state: "merged",
+    labels: ["marketing", "ui"],
+    commits: 8,
+    filesChanged: 6,
+    postStatus: "draft",
+  },
+  {
+    id: "commit-landing-page",
+    type: "commit",
+    title: "Build landing page with hero terminal mockup, 7-card features grid, and pricing",
+    summary:
+      "Built the full Devlog marketing landing page. The hero includes an animated terminal block illustrating the commit-to-post pipeline. Features are presented in a responsive seven-card grid. The pricing section surfaces a platform strip (X, LinkedIn, Reddit, Dev.to, and more) and a clear upgrade CTA.",
+    repo: "devlog",
+    branch: "feature/landing-page",
+    dateIso: "2026-03-16T11:45:00Z",
+    displayTime: "Mar 16, 11:45 AM",
+    hash: "8e6d193",
+    filesChanged: 1,
+    additions: 523,
+    deletions: 0,
+    postStatus: null,
+  },
+
+  // ── Mar 15 ─────────────────────────────────────────────────────────────────
+  {
+    id: "commit-docs",
+    type: "commit",
+    title: "Add architecture docs, API contracts, ADR-0001, and agent worklog",
+    summary:
+      "Created the documentation layer: architecture.md (five-layer structure and migration path), api-contracts.md (three planned API endpoints), ADR-0001 (project structure decision with context, consequences, and follow-up trigger), and agent-worklog.md as the coordination layer for parallel agent sessions.",
+    repo: "devlog",
+    branch: "main",
+    dateIso: "2026-03-15T16:20:00Z",
+    displayTime: "Mar 15",
+    hash: "9f2c038",
+    filesChanged: 4,
+    additions: 214,
+    deletions: 0,
+    postStatus: null,
+  },
+  {
+    id: "commit-init",
+    type: "commit",
+    title: "Initialize Next.js 14 project with TypeScript, Tailwind, and full folder structure",
+    summary:
+      "Bootstrapped Devlog. Configured TypeScript strict mode with @/* path alias, Tailwind 3.4 with Geist font variables, violet accent color tokens, and custom animation keyframes. Set up PostCSS, ESLint next/core-web-vitals, and the complete src/ folder hierarchy including app/, components/, features/, lib/, server/, and types/.",
+    repo: "devlog",
+    branch: "main",
+    dateIso: "2026-03-15T09:00:00Z",
+    displayTime: "Mar 15",
+    hash: "4a1b720",
+    filesChanged: 22,
+    additions: 487,
+    deletions: 0,
+    postStatus: null,
+  },
+];

@@ -188,12 +188,13 @@ Devlog is built on a modern, industry-standard web stack that’s common across 
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| **Frontend** | **React**, **TypeScript**, **Next.js 14 (App Router)**, TailwindCSS, shadcn/ui, Framer Motion | Modern, responsive dashboard UI, content editor, analytics, calendar & timeline interactions |
-| **Backend** | **TypeScript / Node.js** (via Next.js API routes or a small Node service) | GitHub webhook handling, event processing, AI orchestration, API routing, platform integrations |
-| **AI** | OpenAI API, Anthropic API, local model support *(future)* | Commit summarization, outcome-focused narrative, multi-platform post generation, tone adaptation |
-| **Database** | PostgreSQL | Users, repositories, events, generated posts, privacy settings, analytics |
-| **Queue** | Redis, BullMQ *(or equivalent)* | Background AI job processing, scheduled posts, event pipelines |
-| **Infra** | Vercel, Railway / Fly.io, Supabase/Neon, Cloudflare | Frontend hosting, backend services, managed Postgres, auth, edge security |
+| **Frontend** | Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Geist font, Framer Motion | Modern, responsive dashboard UI, timeline, content editor, analytics, and calendar interactions |
+| **Styling** | Tailwind CSS, `clsx`, `tailwind-merge`, `class-variance-authority`, `lucide-react` | Dark-mode design system, variant-based components, utility composition, and icons |
+| **Backend** | Next.js Route Handlers, TypeScript | GitHub webhook handling, event processing, AI orchestration, API routing, and platform integrations |
+| **AI** | OpenAI API, Anthropic API, local model support *(planned)* | Commit summarization, outcome-focused narrative, multi-platform post generation, and tone adaptation |
+| **Database** | PostgreSQL + Prisma | Users, repositories, events, generated posts, privacy settings, and analytics |
+| **Queue** | Redis, BullMQ *(or equivalent)* | Background AI job processing, scheduled posts, and event pipelines |
+| **Infra** | Vercel, Railway / Fly.io, Supabase/Neon, Cloudflare | Frontend hosting, backend services, managed Postgres, auth, and edge security |
 
 Python and FastAPI are also strong candidates for AI-heavy backend components in the future, but the initial product surface is optimized around the React + TypeScript + Next.js ecosystem that most modern dev tools use.
 
@@ -324,18 +325,36 @@ Supporting docs:
 
 ---
 
+## Current Build Status
+
+> Last updated: Mar 19, 2026 · `v0.1.0` · merged into `main`
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Landing page | ✅ Done | Hero, features grid, pricing CTA |
+| App shell | ✅ Done | Sidebar, Topbar, route-group layout |
+| Dashboard | ✅ Prototype | Static placeholder data |
+| Dev Timeline UI | ✅ Done | Fully componentized, fake data, live search + type filter |
+| Settings page | ✅ Prototype | UI shell only |
+| GitHub integration | 🔲 Planned | OAuth, webhook, event normalization |
+| AI post generator | 🔲 Planned | LLM prompt pipeline |
+| Content editor | 🔲 Planned | Rich text, tone adjustment |
+| Multi-platform publishing | 🔲 Planned | X, LinkedIn, Reddit, Dev.to |
+| Content calendar | 🔲 Planned | Scheduling, drag-and-drop |
+| Analytics | 🔲 Planned | Engagement metrics, growth tracking |
+
 ## MVP Scope
 
-The first release includes:
+The first release will include:
 
-- [x] GitHub repo integration
-- [x] Commit detection
-- [x] AI post generator
-- [x] X + LinkedIn publishing
-- [x] Content editor
-- [x] Scheduling
+- [ ] GitHub repo integration (OAuth + webhook)
+- [ ] Commit / PR / release event detection
+- [ ] AI post generator (OpenAI / Anthropic)
+- [ ] X + LinkedIn publishing
+- [ ] Content editor with tone adjustment
+- [ ] Post scheduling
 
-**Estimated build time: 5–10 days**
+**Estimated build time from current state: 5–10 days**
 
 ---
 

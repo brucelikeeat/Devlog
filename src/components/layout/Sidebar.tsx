@@ -11,6 +11,7 @@ import {
   Settings,
   ChevronDown,
   Github,
+  ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { NavItem } from "@/types/nav";
@@ -34,10 +35,18 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-zinc-800 bg-zinc-900">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2.5 border-b border-zinc-800 px-4">
-        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-violet-500">
-          <span className="font-mono text-[11px] font-bold text-white tracking-tight">DL</span>
-        </div>
-        <span className="font-semibold text-zinc-100 tracking-tight">Devlog</span>
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 group"
+          title="Back to home"
+        >
+          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-violet-500 transition-colors group-hover:bg-violet-400">
+            <span className="font-mono text-[11px] font-bold text-white tracking-tight">DL</span>
+          </div>
+          <span className="font-semibold text-zinc-100 tracking-tight group-hover:text-violet-300 transition-colors">
+            Devlog
+          </span>
+        </Link>
         <button className="ml-auto text-zinc-600 hover:text-zinc-400 transition-colors">
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
@@ -74,6 +83,14 @@ export function Sidebar() {
           <SidebarNavLink key={item.href} item={item} pathname={pathname} />
         ))}
 
+        {/* Back to landing */}
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800 transition-all duration-150 group"
+        >
+          <ArrowLeft className="h-4 w-4 flex-shrink-0 transition-transform group-hover:-translate-x-0.5" />
+          <span>Back to site</span>
+        </Link>
         {/* User profile */}
         <button className="mt-1 flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm hover:bg-zinc-800 transition-colors group">
           <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-xs font-semibold text-violet-300">

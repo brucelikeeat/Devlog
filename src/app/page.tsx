@@ -9,9 +9,9 @@ import {
   FileText,
   CalendarDays,
   Lock,
-  GitCommit,
   GitPullRequest,
 } from "lucide-react";
+import { LandingHero } from "@/components/ui/shape-landing-hero";
 
 export default function LandingPage() {
   return (
@@ -56,107 +56,8 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden px-6 pb-28 pt-36">
-        <div className="absolute inset-0 bg-dot-grid opacity-25" />
-        <div className="absolute inset-0 bg-hero-glow" />
-
-        <div className="relative mx-auto max-w-4xl text-center">
-          {/* Eyebrow */}
-          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/70 px-3 py-1 text-xs text-zinc-400">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-500" />
-            AI-powered developer growth engine
-          </div>
-
-          {/* Headline */}
-          <h1 className="mb-6 text-balance text-5xl font-bold leading-[1.07] tracking-tight md:text-6xl lg:text-7xl">
-            Turn your commits
-            <br />
-            <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
-              into content.
-            </span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="mx-auto mb-10 max-w-2xl text-balance text-lg leading-relaxed text-zinc-400 md:text-xl">
-            Devlog monitors your GitHub activity and generates platform-optimized
-            posts for X, LinkedIn, and beyond — so you can build in public without
-            the overhead.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 rounded-lg bg-violet-500 px-5 py-2.5 font-medium text-white transition-colors hover:bg-violet-400"
-            >
-              <Github className="h-4 w-4" />
-              Connect GitHub — it&apos;s free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/timeline"
-              className="flex items-center gap-2 rounded-lg border border-zinc-700 px-5 py-2.5 font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:text-zinc-100"
-            >
-              See the timeline
-            </Link>
-          </div>
-
-          {/* Terminal mockup */}
-          <div className="mx-auto mt-16 max-w-2xl">
-            <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/60 text-left">
-              {/* Window chrome */}
-              <div className="flex items-center gap-1.5 border-b border-zinc-800 bg-zinc-900/80 px-4 py-2.5">
-                <div className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-                <div className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-                <div className="h-2.5 w-2.5 rounded-full bg-zinc-700" />
-                <span className="ml-2 font-mono text-[11px] text-zinc-500">
-                  devlog · activity feed
-                </span>
-              </div>
-
-              {/* Content */}
-              <div className="space-y-4 p-5 font-mono text-sm">
-                <div className="flex items-start gap-3">
-                  <GitCommit className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400" />
-                  <div>
-                    <div className="text-amber-400">
-                      commit detected
-                      <span className="ml-2 text-zinc-500">· startup-validator</span>
-                    </div>
-                    <div className="mt-0.5 text-zinc-400">
-                      &quot;Implemented startup scoring algorithm&quot;
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-400" />
-                  <div>
-                    <span className="text-violet-400">AI analyzing</span>
-                    <span className="text-zinc-500"> · generating outcome-focused summary...</span>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400" />
-                  <div>
-                    <div className="text-emerald-400">
-                      post generated
-                      <span className="ml-2 text-zinc-500">· X (Twitter)</span>
-                    </div>
-                    <div className="mt-0.5 leading-relaxed text-zinc-300">
-                      &quot;Day 14 building my AI startup validator. Just shipped
-                      the scoring engine — it now evaluates ideas across market
-                      size, competition & founder fit...&quot;
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero — animated with framer-motion shapes */}
+      <LandingHero />
 
       {/* Features */}
       <section id="features" className="px-6 py-24">
@@ -191,10 +92,7 @@ export default function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section
-        id="how-it-works"
-        className="border-t border-zinc-800 px-6 py-24"
-      >
+      <section id="how-it-works" className="border-t border-zinc-800 px-6 py-24">
         <div className="mx-auto max-w-4xl">
           <div className="mb-14 text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight">
@@ -217,9 +115,7 @@ export default function LandingPage() {
                   )}
                 </div>
                 <div className="pb-4">
-                  <h3 className="mb-1.5 font-semibold text-zinc-100">
-                    {step.title}
-                  </h3>
+                  <h3 className="mb-1.5 font-semibold text-zinc-100">{step.title}</h3>
                   <p className="text-sm leading-relaxed text-zinc-400">
                     {step.description}
                   </p>
@@ -250,10 +146,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA / Pricing */}
-      <section
-        id="pricing"
-        className="border-t border-zinc-800 px-6 py-28"
-      >
+      <section id="pricing" className="border-t border-zinc-800 px-6 py-28">
         <div className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/60 p-12 text-center">
           <div className="absolute inset-0 bg-hero-glow opacity-60" />
           <div className="relative">
@@ -296,18 +189,9 @@ export default function LandingPage() {
             Built by developers who believe distribution is as important as code.
           </p>
           <div className="flex items-center gap-5 text-xs text-zinc-600">
-            <Link href="#" className="transition-colors hover:text-zinc-400">
-              Privacy
-            </Link>
-            <Link href="#" className="transition-colors hover:text-zinc-400">
-              Terms
-            </Link>
-            <Link
-              href="https://github.com"
-              className="transition-colors hover:text-zinc-400"
-            >
-              GitHub
-            </Link>
+            <Link href="#" className="transition-colors hover:text-zinc-400">Privacy</Link>
+            <Link href="#" className="transition-colors hover:text-zinc-400">Terms</Link>
+            <Link href="https://github.com" className="transition-colors hover:text-zinc-400">GitHub</Link>
           </div>
         </div>
       </footer>

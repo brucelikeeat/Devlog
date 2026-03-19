@@ -21,9 +21,8 @@ export default function SettingsPage() {
         description="Manage your account, integrations, and preferences"
       />
 
-      <main className="flex-1 p-6 animate-fade-in">
+      <main className="flex-1 animate-fade-in p-6">
         <div className="max-w-2xl space-y-5">
-          {/* Profile */}
           <SettingsSection
             icon={User}
             title="Profile"
@@ -43,7 +42,6 @@ export default function SettingsPage() {
             </div>
           </SettingsSection>
 
-          {/* GitHub Integration */}
           <SettingsSection
             icon={Github}
             title="GitHub Integration"
@@ -51,9 +49,7 @@ export default function SettingsPage() {
           >
             <div className="rounded-lg border border-dashed border-zinc-700 p-6 text-center">
               <Github className="mx-auto mb-3 h-8 w-8 text-zinc-600" />
-              <p className="mb-1 text-sm text-zinc-400">
-                No repositories connected
-              </p>
+              <p className="mb-1 text-sm text-zinc-400">No repositories connected</p>
               <p className="mx-auto mb-4 max-w-xs text-xs leading-relaxed text-zinc-600">
                 Connect a GitHub repo to start tracking activity and generating
                 content from your commits.
@@ -65,7 +61,6 @@ export default function SettingsPage() {
             </div>
           </SettingsSection>
 
-          {/* Privacy Controls */}
           <SettingsSection
             icon={Lock}
             title="Privacy Controls"
@@ -93,9 +88,7 @@ export default function SettingsPage() {
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-zinc-200">
-                      {level.name}
-                    </p>
+                    <p className="text-sm font-medium text-zinc-200">{level.name}</p>
                     <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">
                       {level.description}
                     </p>
@@ -105,7 +98,6 @@ export default function SettingsPage() {
             </div>
           </SettingsSection>
 
-          {/* Notifications */}
           <SettingsSection
             icon={Bell}
             title="Notifications"
@@ -118,7 +110,6 @@ export default function SettingsPage() {
                     <p className="text-sm text-zinc-200">{item.label}</p>
                     <p className="text-xs text-zinc-500">{item.description}</p>
                   </div>
-                  {/* Toggle */}
                   <button
                     className={`relative h-5 w-9 flex-shrink-0 rounded-full transition-colors ${
                       item.enabled ? "bg-violet-500" : "bg-zinc-700"
@@ -135,7 +126,6 @@ export default function SettingsPage() {
             </div>
           </SettingsSection>
 
-          {/* Plan */}
           <SettingsSection
             icon={CreditCard}
             title="Plan"
@@ -143,7 +133,7 @@ export default function SettingsPage() {
           >
             <div className="flex items-center justify-between rounded-lg border border-zinc-800 p-4">
               <div>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="mb-1 flex items-center gap-2">
                   <p className="text-sm font-medium text-zinc-100">Free</p>
                   <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
                     Current
@@ -159,11 +149,8 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            {/* Pro callout */}
             <div className="mt-3 rounded-lg border border-violet-500/20 bg-violet-500/5 p-4">
-              <p className="mb-1 text-sm font-medium text-violet-300">
-                Devlog Pro
-              </p>
+              <p className="mb-1 text-sm font-medium text-violet-300">Devlog Pro</p>
               <ul className="mb-3 space-y-1 text-xs text-zinc-400">
                 <li>Unlimited generation</li>
                 <li>Scheduling + content calendar</li>

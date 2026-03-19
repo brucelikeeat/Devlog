@@ -25,48 +25,42 @@ export default function DashboardPage() {
       />
 
       <main className="flex-1 p-6 space-y-6 animate-fade-in">
-        {/* Welcome */}
         <div>
           <h2 className="text-xl font-semibold text-zinc-100 tracking-tight">
             Good morning.
           </h2>
-          <p className="text-sm text-zinc-500 mt-0.5">
+          <p className="mt-0.5 text-sm text-zinc-500">
             Here&apos;s what&apos;s happening with your repos today.
           </p>
         </div>
 
-        {/* Stats grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 hover:border-zinc-700 transition-colors"
+              className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 transition-colors hover:border-zinc-700"
             >
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs text-zinc-500 font-medium">{stat.label}</p>
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-xs font-medium text-zinc-500">{stat.label}</p>
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-zinc-800">
                   <stat.icon className="h-3.5 w-3.5 text-zinc-400" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-zinc-100 font-mono tracking-tight">
+              <p className="font-mono text-2xl font-bold tracking-tight text-zinc-100">
                 {stat.value}
               </p>
-              <p className="text-xs text-zinc-600 mt-1">{stat.change}</p>
+              <p className="mt-1 text-xs text-zinc-600">{stat.change}</p>
             </div>
           ))}
         </div>
 
-        {/* Main content row */}
         <div className="grid gap-5 lg:grid-cols-3">
-          {/* Recent activity */}
-          <div className="lg:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-800">
-              <h3 className="text-sm font-medium text-zinc-100">
-                Recent Activity
-              </h3>
+          <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/40 lg:col-span-2">
+            <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3.5">
+              <h3 className="text-sm font-medium text-zinc-100">Recent Activity</h3>
               <a
                 href="/timeline"
-                className="flex items-center gap-1 text-xs text-zinc-500 hover:text-violet-400 transition-colors"
+                className="flex items-center gap-1 text-xs text-zinc-500 transition-colors hover:text-violet-400"
               >
                 View timeline
                 <ArrowRight className="h-3 w-3" />
@@ -81,11 +75,9 @@ export default function DashboardPage() {
                   >
                     <item.icon className={`h-3.5 w-3.5 ${item.iconColor}`} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-zinc-200 leading-snug">
-                      {item.title}
-                    </p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm leading-snug text-zinc-200">{item.title}</p>
+                    <div className="mt-0.5 flex items-center gap-2">
                       <span className="font-mono text-[11px] text-zinc-500">
                         {item.repo}
                       </span>
@@ -103,38 +95,36 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Quick actions */}
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-zinc-800">
-              <h3 className="text-sm font-medium text-zinc-100">
-                Quick Actions
-              </h3>
+          <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/40">
+            <div className="border-b border-zinc-800 px-5 py-3.5">
+              <h3 className="text-sm font-medium text-zinc-100">Quick Actions</h3>
             </div>
 
-            <div className="p-4 space-y-2">
+            <div className="space-y-2 p-4">
               {quickActions.map((action) => (
                 <button
                   key={action.label}
                   disabled={action.disabled}
-                  className="w-full flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-400 hover:border-zinc-700 hover:text-zinc-100 transition-colors disabled:opacity-35 disabled:cursor-not-allowed text-left"
+                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2.5 text-left text-sm text-zinc-400 transition-colors hover:border-zinc-700 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-35"
                 >
-                  <action.icon className="h-4 w-4 text-zinc-500 flex-shrink-0" />
-                  <span className="flex-1 text-xs">{action.label}</span>
-                  {action.disabled && (
-                    <span className="text-[9px] font-medium uppercase tracking-wider text-zinc-700">
-                      soon
-                    </span>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <action.icon className="h-4 w-4 flex-shrink-0 text-zinc-500" />
+                    <span className="flex-1 text-xs">{action.label}</span>
+                    {action.disabled && (
+                      <span className="text-[9px] font-medium uppercase tracking-wider text-zinc-700">
+                        soon
+                      </span>
+                    )}
+                  </div>
                 </button>
               ))}
             </div>
 
-            {/* Connect repo prompt */}
             <div className="px-4 pb-4">
               <div className="rounded-lg border border-dashed border-zinc-800 bg-zinc-900/30 p-4 text-center">
                 <Github className="mx-auto mb-2 h-6 w-6 text-zinc-700" />
                 <p className="mb-1 text-xs text-zinc-500">No repos connected</p>
-                <p className="mb-3 text-[11px] text-zinc-600 leading-relaxed">
+                <p className="mb-3 text-[11px] leading-relaxed text-zinc-600">
                   Connect a GitHub repo to start tracking activity.
                 </p>
                 <button className="inline-flex items-center gap-1.5 text-xs text-violet-400 transition-colors hover:text-violet-300">
@@ -180,7 +170,6 @@ const stats = [
 const recentActivity = [
   {
     id: 1,
-    type: "commit",
     title: "Set up base Next.js application structure",
     repo: "devlog",
     time: "just now",
@@ -191,7 +180,6 @@ const recentActivity = [
   },
   {
     id: 2,
-    type: "pr",
     title: "feature/dev-timeline-ui — opened",
     repo: "devlog",
     time: "2 days ago",
@@ -202,7 +190,6 @@ const recentActivity = [
   },
   {
     id: 3,
-    type: "release",
     title: "v0.1.0 · Project initialized",
     repo: "devlog",
     time: "3 days ago",

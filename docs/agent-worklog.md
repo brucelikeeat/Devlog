@@ -13,9 +13,15 @@ Every `feature/*` branch must update this file in its first meaningful commit so
 
 ## Active Work
 
-| Branch | Owner / Chat | Scope | Expected Files | Status | Notes |
+| Branch | Owner / Chat | Scope | Files Touched | Status | Notes |
 |--------|---------------|-------|----------------|--------|-------|
-| `feature/dev-timeline-ui` | Current implementation thread | Scaffold initial timeline UI structure and planning docs | `src/features/timeline`, `src/components/timeline`, `docs/*` | in progress | First feature branch created during project setup |
+## Completed
+
+| Branch | Merged | Scope | Notes |
+|--------|--------|-------|-------|
+| `feature/dev-timeline-ui` | Mar 19, 2026 → `main` | Timeline types, fake data, filters, app shell restoration, dashboard/settings/timeline routes, Tailwind/Next scaffold fixes | Merged locally into `main`; branch can be deleted after push |
+| `feature/app-shell` | Mar 18, 2026 → `main` | Sidebar, Topbar, (app) route-group layout, dashboard/settings placeholders | PR #3 |
+| `feature/landing-page` | Mar 16, 2026 → `main` | Full marketing landing page | PR #2 |
 
 ## Update Template
 

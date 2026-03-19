@@ -27,6 +27,8 @@ Option A: single application with clear internal boundaries.
   - OAuth, repo selection, webhook ingestion, event normalization.
 - `timeline`
   - Internal devlog feed, timeline grouping, progress views.
+  - Internal devlog feed, timeline grouping, progress views.
+  - Current implementation includes `types.ts`, `data.ts`, `useTimelineFilter.ts`, and UI components in `src/components/timeline/`.
 - `privacy`
   - Repo privacy levels, sanitization rules, post visibility policies.
 - `post-generator`
