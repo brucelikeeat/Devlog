@@ -15,7 +15,7 @@ Every `feature/*` branch must update this file in its first meaningful commit so
 
 | Branch | Owner / Chat | Scope | Files Touched | Status | Notes |
 |--------|---------------|-------|----------------|--------|-------|
-| `feature/dev-timeline-ui` | TimelineUi chat | Timeline feature types, data, hook, and all UI components | `src/features/timeline/types.ts`, `src/features/timeline/data.ts`, `src/features/timeline/useTimelineFilter.ts`, `src/components/timeline/TimelineEntryCard.tsx`, `src/components/timeline/TimelineFilters.tsx`, `src/components/timeline/TimelineList.tsx`, `src/components/timeline/TimelineView.tsx`, `src/components/timeline/index.ts`, `src/app/(app)/timeline/page.tsx` | **done** | Fake data, live search + type filter, date groups. Ready to swap data layer for real API. |
+| `feature/dev-timeline-ui` | TimelineUi chat | Timeline feature types, data, hook, all UI components, and restored root app scaffold required to run the page | `src/features/timeline/types.ts`, `src/features/timeline/data.ts`, `src/features/timeline/useTimelineFilter.ts`, `src/components/timeline/TimelineEntryCard.tsx`, `src/components/timeline/TimelineFilters.tsx`, `src/components/timeline/TimelineList.tsx`, `src/components/timeline/TimelineView.tsx`, `src/components/timeline/index.ts`, `src/components/layout/Topbar.tsx`, `src/lib/utils/cn.ts`, `src/app/(app)/timeline/page.tsx`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/app/globals.css`, `package.json`, `tsconfig.json`, `postcss.config.js`, `tailwind.config.ts` | **in progress** | Fake data, live search + type filter, date groups. Restored missing Next/Tailwind root config so the timeline route can boot again. |
 
 ## Completed
 
