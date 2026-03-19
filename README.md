@@ -186,10 +186,11 @@ Help developers grow audiences, acquire early users, build communities, and laun
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| **Frontend** | Next.js 14, React, TypeScript, TailwindCSS, ShadCN UI, Framer Motion | Dashboard, content editor, analytics, calendar UI |
-| **Backend** | Node.js, Express / Fastify, TypeScript | GitHub event processing, AI generation, API routing, platform integrations |
-| **AI** | OpenAI API, Anthropic API, local model support *(future)* | Commit summarization, post generation, tone adaptation, thread formatting |
-| **Database** | PostgreSQL | Users, repositories, generated posts, platform tokens, analytics |
+| **Frontend** | Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Geist font | Dashboard, timeline, content editor, analytics, calendar UI |
+| **Styling** | Tailwind CSS, `clsx`, `tailwind-merge`, `class-variance-authority`, `lucide-react` | Dark-mode design system, variant-based components, icon library |
+| **Backend** | Next.js Route Handlers, TypeScript | GitHub event processing, AI generation, API routing, platform integrations |
+| **AI** | OpenAI API, Anthropic API, local model support *(planned)* | Commit summarization, post generation, tone adaptation, thread formatting |
+| **Database** | PostgreSQL + Prisma | Users, repositories, generated posts, platform tokens, analytics |
 | **Queue** | Redis, BullMQ | AI job processing, scheduled posts, event pipelines |
 | **Infra** | Vercel, Railway / Fly.io, Supabase, Cloudflare | Frontend hosting, backend hosting, auth + database, edge security |
 
@@ -283,18 +284,36 @@ This keeps `main` clean for deployments while preserving a clear history of feat
 
 ---
 
+## Current Build Status
+
+> Last updated: Mar 19, 2026 · `v0.1.0` · branch `feature/dev-timeline-ui`
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Landing page | ✅ Done | Hero, features grid, pricing CTA |
+| App shell | ✅ Done | Sidebar, Topbar, route-group layout |
+| Dashboard | ✅ Prototype | Static placeholder data |
+| Dev Timeline UI | ✅ Done | Fully componentized, fake data, live search + type filter |
+| Settings page | ✅ Prototype | UI shell only |
+| GitHub integration | 🔲 Planned | OAuth, webhook, event normalization |
+| AI post generator | 🔲 Planned | LLM prompt pipeline |
+| Content editor | 🔲 Planned | Rich text, tone adjustment |
+| Multi-platform publishing | 🔲 Planned | X, LinkedIn, Reddit, Dev.to |
+| Content calendar | 🔲 Planned | Scheduling, drag-and-drop |
+| Analytics | 🔲 Planned | Engagement metrics, growth tracking |
+
 ## MVP Scope
 
-The first release includes:
+The first release will include:
 
-- [x] GitHub repo integration
-- [x] Commit detection
-- [x] AI post generator
-- [x] X + LinkedIn publishing
-- [x] Content editor
-- [x] Scheduling
+- [ ] GitHub repo integration (OAuth + webhook)
+- [ ] Commit / PR / release event detection
+- [ ] AI post generator (OpenAI / Anthropic)
+- [ ] X + LinkedIn publishing
+- [ ] Content editor with tone adjustment
+- [ ] Post scheduling
 
-**Estimated build time: 5–10 days**
+**Estimated build time from current state: 5–10 days**
 
 ---
 
