@@ -336,7 +336,7 @@ Supporting docs:
 | Dashboard | ✅ Prototype | Static placeholder data |
 | Dev Timeline UI | ✅ Done | Fully componentized, fake data, live search + type filter |
 | Settings page | ✅ Prototype | UI shell only |
-| GitHub integration | 🔲 Planned | OAuth, webhook, event normalization |
+| GitHub integration | 🟡 In Progress | OAuth connect, repo picker, commit fetch (no webhooks yet) |
 | AI post generator | 🔲 Planned | LLM prompt pipeline |
 | Content editor | 🔲 Planned | Rich text, tone adjustment |
 | Multi-platform publishing | 🔲 Planned | X, LinkedIn, Reddit, Dev.to |
@@ -387,7 +387,7 @@ Devlog will use simple semantic versioning to mark meaningful product stages.
 - Reliable GitHub event ingestion for selected repos.
 - AI-generated summaries for meaningful events (commit/PR → outcome-focused text).
 - Editable dev timeline entries and a first version of privacy levels (e.g., high vs medium).
-- Ability to generate draft posts for at least X and LinkedIn.
+- Ability to generate draft posts for at least reddit, maybe X and LinkedIn.
 - Onboarding that a small group of external testers can complete without hand-holding.
 
 ### v1.0.0 – Public Launch

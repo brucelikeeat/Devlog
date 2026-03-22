@@ -15,6 +15,7 @@ Every `feature/*` branch must update this file in its first meaningful commit so
 
 | Branch | Owner / Chat | Scope | Files Touched | Status | Notes |
 |--------|---------------|-------|----------------|--------|-------|
+| `feature/github-integration` | GitHub integration chat | First real GitHub integration slice: OAuth connect, repo list, commit fetch, timeline wiring | `src/lib/github/*`, `src/app/api/github/*`, `src/features/github/*`, `src/components/github/*`, `src/app/(app)/settings/page.tsx`, `src/app/(app)/timeline/page.tsx`, `src/components/layout/Sidebar.tsx`, `docs/api-contracts.md` | in progress | No webhooks yet; token stored in httpOnly cookie; no database dependency |
 ## Completed
 
 | Branch | Merged | Scope | Notes |
