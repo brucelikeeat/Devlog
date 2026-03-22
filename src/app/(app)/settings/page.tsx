@@ -1,4 +1,6 @@
+import { cookies } from "next/headers";
 import { Topbar } from "@/components/layout/Topbar";
+import { GitHubSettingsSection } from "@/components/github";
 import {
   Github,
   Bell,
@@ -8,12 +10,35 @@ import {
   ChevronRight,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { GitHubConnectionStatus } from "@/lib/github/types";
 
 export const metadata = {
   title: "Settings",
 };
 
+function getGitHubStatus(): GitHubConnectionStatus {
+  const cookieStore = cookies();
+  const token = cookieStore.get("github_token")?.value;
+  const userRaw = cookieStore.get("github_user")?.value;
+  const selectedRepo = cookieStore.get("github_repo")?.value ?? null;
+
+  if (!token || !userRaw) {
+    return { connected: false, user: null, selectedRepo: null };
+  }
+
+  let user: { login: string; avatarUrl: string } | null = null;
+  try {
+    user = JSON.parse(userRaw);
+  } catch {
+    user = null;
+  }
+
+  return { connected: !!user, user, selectedRepo };
+}
+
 export default function SettingsPage() {
+  const githubStatus = getGitHubStatus();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Topbar
@@ -45,20 +70,9 @@ export default function SettingsPage() {
           <SettingsSection
             icon={Github}
             title="GitHub Integration"
-            description="Connected repositories and webhook status"
+            description="Connected repositories and activity tracking"
           >
-            <div className="rounded-lg border border-dashed border-zinc-700 p-6 text-center">
-              <Github className="mx-auto mb-3 h-8 w-8 text-zinc-600" />
-              <p className="mb-1 text-sm text-zinc-400">No repositories connected</p>
-              <p className="mx-auto mb-4 max-w-xs text-xs leading-relaxed text-zinc-600">
-                Connect a GitHub repo to start tracking activity and generating
-                content from your commits.
-              </p>
-              <button className="inline-flex items-center gap-2 rounded-md bg-zinc-800 px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-zinc-700">
-                <Github className="h-3.5 w-3.5" />
-                Connect GitHub
-              </button>
-            </div>
+            <GitHubSettingsSection initialStatus={githubStatus} />
           </SettingsSection>
 
           <SettingsSection
