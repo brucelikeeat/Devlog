@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -12,6 +13,7 @@ import {
   ChevronDown,
   Github,
   ArrowLeft,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { NavItem } from "@/types/nav";
@@ -28,8 +30,26 @@ const bottomNavItems: NavItem[] = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
+function useGitHubConnection() {
+  const [connected, setConnected] = useState(false);
+  const [repoName, setRepoName] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/github/status")
+      .then((res) => res.json())
+      .then((data) => {
+        setConnected(data.connected);
+        setRepoName(data.selectedRepo);
+      })
+      .catch(() => {});
+  }, []);
+
+  return { connected, repoName };
+}
+
 export function Sidebar() {
   const pathname = usePathname();
+  const { connected, repoName } = useGitHubConnection();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-zinc-800 bg-zinc-900">
@@ -54,11 +74,34 @@ export function Sidebar() {
 
       {/* Repo selector */}
       <div className="px-3 pt-3">
-        <button className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition-colors border border-dashed border-zinc-800 hover:border-zinc-700">
-          <Github className="h-3.5 w-3.5 flex-shrink-0" />
-          <span className="truncate">No repo connected</span>
-          <ChevronDown className="ml-auto h-3 w-3 flex-shrink-0" />
-        </button>
+        {connected && repoName ? (
+          <Link
+            href="/settings"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-emerald-400 hover:bg-zinc-800 transition-colors border border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/30"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate font-mono">{repoName.split("/").pop()}</span>
+            <ChevronDown className="ml-auto h-3 w-3 flex-shrink-0" />
+          </Link>
+        ) : connected ? (
+          <Link
+            href="/settings"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-violet-400 hover:bg-zinc-800 transition-colors border border-violet-500/20 bg-violet-500/5 hover:border-violet-500/30"
+          >
+            <Github className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">Select a repo</span>
+            <ChevronDown className="ml-auto h-3 w-3 flex-shrink-0" />
+          </Link>
+        ) : (
+          <Link
+            href="/settings"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition-colors border border-dashed border-zinc-800 hover:border-zinc-700"
+          >
+            <Github className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">No repo connected</span>
+            <ChevronDown className="ml-auto h-3 w-3 flex-shrink-0" />
+          </Link>
+        )}
       </div>
 
       {/* Section label */}
