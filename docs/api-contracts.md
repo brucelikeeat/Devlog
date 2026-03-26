@@ -4,25 +4,22 @@ This file tracks the public and internal API shapes that multiple features depen
 
 Keep this updated whenever a route contract changes so parallel chats do not drift.
 
+## Authentication (NextAuth.js)
+
+Sign-in is handled by **NextAuth** under:
+
+- `GET/POST /api/auth/*` (e.g. `GET /api/auth/signin/github`, `GET /api/auth/callback/github`)
+
+GitHub OAuth App **Authorization callback URL** must be:
+
+- Local: `http://localhost:3000/api/auth/callback/github`
+- Production: `https://<your-domain>/api/auth/callback/github`
+
+Requires env: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `DATABASE_URL`
+
+User sessions and GitHub access tokens are stored via the **Prisma adapter** (database), not integration cookies.
+
 ## Implemented Endpoints
-
-### `GET /api/github/auth`
-
-Purpose:
-- Start the GitHub OAuth flow.
-- Redirects the user to GitHub's authorization page.
-
-Requires env: `GITHUB_CLIENT_ID`, `NEXTAUTH_URL`
-
-### `GET /api/github/callback`
-
-Purpose:
-- Handle the OAuth redirect from GitHub.
-- Exchange the authorization code for an access token.
-- Store the access token in an httpOnly cookie and GitHub user info in a regular cookie.
-- Redirect back to `/settings`.
-
-Requires env: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `NEXTAUTH_URL`
 
 ### `GET /api/github/status`
 
@@ -43,7 +40,7 @@ type GitHubConnectionStatus = {
 
 Purpose:
 - Fetch the authenticated user's GitHub repositories.
-- Requires active GitHub connection (token in cookie).
+- Requires a signed-in NextAuth session and a valid GitHub `access_token` on the user's `Account` row.
 
 Response: Array of GitHub repository objects (sorted by most recently pushed).
 
@@ -58,7 +55,7 @@ Response: Array of GitHub commit objects.
 ### `POST /api/github/select-repo`
 
 Purpose:
-- Store the selected repository in a cookie.
+- Persist the selected repository for the signed-in user (`User.selectedGithubRepo` in the database).
 - Used by the repo picker UI.
 
 Request body:
@@ -70,8 +67,8 @@ Request body:
 ### `POST /api/github/disconnect`
 
 Purpose:
-- Clear all GitHub-related cookies (token, user, repo).
-- Effectively disconnects the GitHub integration.
+- Clear `User.selectedGithubRepo` only (stop tracking a repository).
+- Does not remove the GitHub OAuth link; use **Sign out** to end the app session.
 
 ## Planned Endpoints
 
