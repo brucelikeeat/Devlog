@@ -1,4 +1,5 @@
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
 import { GitHubSettingsSection } from "@/components/github";
 import {
@@ -10,34 +11,24 @@ import {
   ChevronRight,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { GitHubConnectionStatus } from "@/lib/github/types";
+import { authOptions } from "@/lib/auth";
+import { buildGithubConnectionStatus } from "@/server/github/buildGithubConnectionStatus";
 
 export const metadata = {
   title: "Settings",
 };
 
-function getGitHubStatus(): GitHubConnectionStatus {
-  const cookieStore = cookies();
-  const token = cookieStore.get("github_token")?.value;
-  const userRaw = cookieStore.get("github_user")?.value;
-  const selectedRepo = cookieStore.get("github_repo")?.value ?? null;
-
-  if (!token || !userRaw) {
-    return { connected: false, user: null, selectedRepo: null };
+export default async function SettingsPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    redirect("/login");
   }
 
-  let user: { login: string; avatarUrl: string } | null = null;
-  try {
-    user = JSON.parse(userRaw);
-  } catch {
-    user = null;
-  }
+  const githubStatus = await buildGithubConnectionStatus(session);
 
-  return { connected: !!user, user, selectedRepo };
-}
-
-export default function SettingsPage() {
-  const githubStatus = getGitHubStatus();
+  const displayName = session.user.name ?? session.user.email ?? "User";
+  const displayEmail = session.user.email ?? "";
+  const avatarLetter = displayName.charAt(0).toUpperCase();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -54,16 +45,28 @@ export default function SettingsPage() {
             description="Your account information"
           >
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-lg font-semibold text-violet-300">
-                BL
+              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-500/20 text-lg font-semibold text-violet-300">
+                {session.user.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={session.user.image}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  avatarLetter
+                )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-zinc-100">bruceliu</p>
-                <p className="text-xs text-zinc-500">bruce@example.com</p>
+                <p className="text-sm font-medium text-zinc-100">{displayName}</p>
+                {displayEmail && (
+                  <p className="text-xs text-zinc-500">{displayEmail}</p>
+                )}
+                <p className="mt-1 text-[11px] text-zinc-600">
+                  Signed in with GitHub. Each Devlog user has their own GitHub
+                  connection and repo choice.
+                </p>
               </div>
-              <button className="flex-shrink-0 rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200">
-                Edit profile
-              </button>
             </div>
           </SettingsSection>
 
