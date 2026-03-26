@@ -11,6 +11,7 @@ import {
   Lock,
   GitPullRequest,
 } from "lucide-react";
+import { PublishPlatformsSection } from "@/components/landing/PublishPlatformsSection";
 import { LandingHero } from "@/components/ui/shape-landing-hero";
 
 export default function LandingPage() {
@@ -126,24 +127,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Platforms */}
-      <section className="border-t border-zinc-800 px-6 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="mb-7 font-mono text-[11px] uppercase tracking-widest text-zinc-600">
-            Publish to
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {platforms.map((p) => (
-              <div
-                key={p}
-                className="rounded-full border border-zinc-800 bg-zinc-900/50 px-4 py-1.5 text-sm text-zinc-400"
-              >
-                {p}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PublishPlatformsSection />
 
       {/* CTA / Pricing */}
       <section id="pricing" className="border-t border-zinc-800 px-6 py-28">
@@ -262,12 +246,3 @@ const steps = [
   },
 ];
 
-const platforms = [
-  "X (Twitter)",
-  "LinkedIn",
-  "Reddit",
-  "Indie Hackers",
-  "Dev.to",
-  "Hashnode",
-  "Product Hunt",
-];
