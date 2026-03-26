@@ -15,6 +15,7 @@ Every `feature/*` branch must update this file in its first meaningful commit so
 
 | Branch | Owner / Chat | Scope | Files Touched | Status | Notes |
 |--------|---------------|-------|----------------|--------|-------|
+| `feature/github-integration` | GitHub integration chat | NextAuth + Prisma: per-user GitHub sign-in, DB-backed sessions/tokens, repo picker, timeline commits | `prisma/*`, `src/lib/auth.ts`, `src/lib/prisma.ts`, `src/app/api/auth/*`, `src/app/api/github/*`, `src/app/login/*`, `src/server/github/*`, `src/components/github/*`, `(app)/layout`, settings/timeline/sidebar, `docs/api-contracts.md` | in progress | SQLite locally; production: Postgres + same schema. Webhooks not implemented. |
 ## Completed
 
 | Branch | Merged | Scope | Notes |

@@ -1,4 +1,7 @@
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
+import { GitHubSettingsSection } from "@/components/github";
 import {
   Github,
   Bell,
@@ -8,12 +11,25 @@ import {
   ChevronRight,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { authOptions } from "@/lib/auth";
+import { buildGithubConnectionStatus } from "@/server/github/buildGithubConnectionStatus";
 
 export const metadata = {
   title: "Settings",
 };
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  const githubStatus = await buildGithubConnectionStatus(session);
+
+  const displayName = session.user.name ?? session.user.email ?? "User";
+  const displayEmail = session.user.email ?? "";
+  const avatarLetter = displayName.charAt(0).toUpperCase();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Topbar
@@ -29,36 +45,37 @@ export default function SettingsPage() {
             description="Your account information"
           >
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-lg font-semibold text-violet-300">
-                BL
+              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-500/20 text-lg font-semibold text-violet-300">
+                {session.user.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={session.user.image}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  avatarLetter
+                )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-zinc-100">bruceliu</p>
-                <p className="text-xs text-zinc-500">bruce@example.com</p>
+                <p className="text-sm font-medium text-zinc-100">{displayName}</p>
+                {displayEmail && (
+                  <p className="text-xs text-zinc-500">{displayEmail}</p>
+                )}
+                <p className="mt-1 text-[11px] text-zinc-600">
+                  Signed in with GitHub. Each Devlog user has their own GitHub
+                  connection and repo choice.
+                </p>
               </div>
-              <button className="flex-shrink-0 rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200">
-                Edit profile
-              </button>
             </div>
           </SettingsSection>
 
           <SettingsSection
             icon={Github}
             title="GitHub Integration"
-            description="Connected repositories and webhook status"
+            description="Connected repositories and activity tracking"
           >
-            <div className="rounded-lg border border-dashed border-zinc-700 p-6 text-center">
-              <Github className="mx-auto mb-3 h-8 w-8 text-zinc-600" />
-              <p className="mb-1 text-sm text-zinc-400">No repositories connected</p>
-              <p className="mx-auto mb-4 max-w-xs text-xs leading-relaxed text-zinc-600">
-                Connect a GitHub repo to start tracking activity and generating
-                content from your commits.
-              </p>
-              <button className="inline-flex items-center gap-2 rounded-md bg-zinc-800 px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-zinc-700">
-                <Github className="h-3.5 w-3.5" />
-                Connect GitHub
-              </button>
-            </div>
+            <GitHubSettingsSection initialStatus={githubStatus} />
           </SettingsSection>
 
           <SettingsSection

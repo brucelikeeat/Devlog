@@ -127,10 +127,13 @@ export default function DashboardPage() {
                 <p className="mb-3 text-[11px] leading-relaxed text-zinc-600">
                   Connect a GitHub repo to start tracking activity.
                 </p>
-                <button className="inline-flex items-center gap-1.5 text-xs text-violet-400 transition-colors hover:text-violet-300">
+                <a
+                  href="/settings"
+                  className="inline-flex items-center gap-1.5 text-xs text-violet-400 transition-colors hover:text-violet-300"
+                >
                   <Plus className="h-3 w-3" />
                   Connect a repository
-                </button>
+                </a>
               </div>
             </div>
           </div>

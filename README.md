@@ -205,8 +205,8 @@ Python and FastAPI are also strong candidates for AI-heavy backend components in
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL
-- Redis
+- A **GitHub OAuth App** (for “Sign in with GitHub”)
+- **SQLite** is used by default for local development (no Postgres required to start). Redis/Postgres remain optional for future features.
 
 ### Setup
 
@@ -219,20 +219,27 @@ cd devlog
 npm install
 
 # Configure environment variables
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Add your keys to `.env`:
+Add your keys to `.env.local` at minimum:
 
 ```env
-OPENAI_API_KEY=
+DATABASE_URL="file:./prisma/dev.db"
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-DATABASE_URL=
-REDIS_URL=
+NEXTAUTH_SECRET=   # e.g. openssl rand -base64 32
+NEXTAUTH_URL=http://localhost:3000
 ```
 
+In your **GitHub OAuth App**, set **Authorization callback URL** to:
+
+`http://localhost:3000/api/auth/callback/github`
+
 ```bash
+# Create / update the local database
+npx prisma migrate dev
+
 # Start development server
 npm run dev
 ```
@@ -336,7 +343,7 @@ Supporting docs:
 | Dashboard | ✅ Prototype | Static placeholder data |
 | Dev Timeline UI | ✅ Done | Fully componentized, fake data, live search + type filter |
 | Settings page | ✅ Prototype | UI shell only |
-| GitHub integration | 🔲 Planned | OAuth, webhook, event normalization |
+| GitHub integration | 🟡 In Progress | OAuth connect, repo picker, commit fetch (no webhooks yet) |
 | AI post generator | 🔲 Planned | LLM prompt pipeline |
 | Content editor | 🔲 Planned | Rich text, tone adjustment |
 | Multi-platform publishing | 🔲 Planned | X, LinkedIn, Reddit, Dev.to |
@@ -387,7 +394,7 @@ Devlog will use simple semantic versioning to mark meaningful product stages.
 - Reliable GitHub event ingestion for selected repos.
 - AI-generated summaries for meaningful events (commit/PR → outcome-focused text).
 - Editable dev timeline entries and a first version of privacy levels (e.g., high vs medium).
-- Ability to generate draft posts for at least X and LinkedIn.
+- Ability to generate draft posts for at least reddit, maybe X and LinkedIn.
 - Onboarding that a small group of external testers can complete without hand-holding.
 
 ### v1.0.0 – Public Launch

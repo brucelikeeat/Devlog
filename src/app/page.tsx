@@ -40,13 +40,13 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/dashboard"
+              href="/login"
               className="text-sm text-zinc-400 transition-colors hover:text-zinc-100"
             >
               Sign in
             </Link>
             <Link
-              href="/dashboard"
+              href="/login"
               className="flex items-center gap-1.5 rounded-md bg-violet-500 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-violet-400"
             >
               <Github className="h-3.5 w-3.5" />
