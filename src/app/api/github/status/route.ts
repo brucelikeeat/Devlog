@@ -1,14 +1,13 @@
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { authOptions } from "@/lib/auth";
 import type { GitHubConnectionStatus } from "@/lib/github/types";
+import { prisma } from "@/lib/prisma";
+import { getGithubAccessTokenForUser } from "@/server/github/getGithubAccessToken";
 
 export async function GET() {
-  const cookieStore = cookies();
-  const token = cookieStore.get("github_token")?.value;
-  const userRaw = cookieStore.get("github_user")?.value;
-  const selectedRepo = cookieStore.get("github_repo")?.value ?? null;
-
-  if (!token || !userRaw) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
     const status: GitHubConnectionStatus = {
       connected: false,
       user: null,
@@ -17,17 +16,21 @@ export async function GET() {
     return NextResponse.json(status);
   }
 
-  let user: { login: string; avatarUrl: string } | null = null;
-  try {
-    user = JSON.parse(userRaw);
-  } catch {
-    user = null;
-  }
+  const token = await getGithubAccessTokenForUser(session.user.id);
+  const account = await prisma.account.findFirst({
+    where: { userId: session.user.id, provider: "github" },
+    select: { providerAccountId: true },
+  });
 
   const status: GitHubConnectionStatus = {
-    connected: true,
-    user,
-    selectedRepo,
+    connected: !!token,
+    user: account
+      ? {
+          login: account.providerAccountId,
+          avatarUrl: session.user.image ?? "",
+        }
+      : null,
+    selectedRepo: session.user.selectedGithubRepo,
   };
 
   return NextResponse.json(status);

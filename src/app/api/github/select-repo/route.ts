@@ -1,22 +1,24 @@
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
   const { repo } = body as { repo: string | null };
 
-  const response = NextResponse.json({ ok: true });
+  const value =
+    typeof repo === "string" && repo.trim().length > 0 ? repo.trim() : null;
 
-  if (repo) {
-    response.cookies.set("github_repo", repo, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30,
-    });
-  } else {
-    response.cookies.set("github_repo", "", { maxAge: 0, path: "/" });
-  }
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { selectedGithubRepo: value },
+  });
 
-  return response;
+  return NextResponse.json({ ok: true });
 }

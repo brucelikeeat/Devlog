@@ -1,13 +1,19 @@
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { authOptions } from "@/lib/auth";
 import { fetchUserRepos } from "@/lib/github/api";
+import { getGithubAccessTokenForUser } from "@/server/github/getGithubAccessToken";
 
 export async function GET() {
-  const token = cookies().get("github_token")?.value;
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
+  const token = await getGithubAccessTokenForUser(session.user.id);
   if (!token) {
     return NextResponse.json(
-      { error: "Not connected to GitHub" },
+      { error: "No GitHub token on file. Sign in again with GitHub." },
       { status: 401 },
     );
   }

@@ -1,11 +1,13 @@
-import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
 import { Topbar } from "@/components/layout/Topbar";
 import { TimelineView } from "@/components/timeline";
 import { TIMELINE_ENTRIES } from "@/features/timeline/data";
 import { fetchRepoCommits } from "@/lib/github/api";
+import { authOptions } from "@/lib/auth";
 import { mapCommitsToTimeline } from "@/features/github/mapCommitsToTimeline";
 import type { TimelineEntry } from "@/features/timeline/types";
 import { Github } from "lucide-react";
+import { getGithubAccessTokenForUser } from "@/server/github/getGithubAccessToken";
 
 export const metadata = {
   title: "Timeline",
@@ -17,9 +19,13 @@ async function getTimelineEntries(): Promise<{
   repoName: string | null;
   error: string | null;
 }> {
-  const cookieStore = cookies();
-  const token = cookieStore.get("github_token")?.value;
-  const repo = cookieStore.get("github_repo")?.value;
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return { entries: TIMELINE_ENTRIES, source: "demo", repoName: null, error: null };
+  }
+
+  const token = await getGithubAccessTokenForUser(session.user.id);
+  const repo = session.user.selectedGithubRepo;
 
   if (!token || !repo) {
     return { entries: TIMELINE_ENTRIES, source: "demo", repoName: null, error: null };
@@ -69,7 +75,8 @@ export default async function TimelinePage() {
                   Showing demo data instead. Check your connection in{" "}
                   <a href="/settings" className="text-violet-400 hover:text-violet-300">
                     Settings
-                  </a>.
+                  </a>
+                  .
                 </p>
               </div>
             ) : (
@@ -82,9 +89,9 @@ export default async function TimelinePage() {
                       href="/settings"
                       className="text-violet-400 transition-colors hover:text-violet-300"
                     >
-                      Connect a GitHub repo
+                      Choose a GitHub repository
                     </a>{" "}
-                    to see real commits here.
+                    in Settings to see your real commits here.
                   </p>
                 </div>
               </div>
