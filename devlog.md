@@ -7,7 +7,7 @@
 ### Project Snapshot
 
 - **Project**: Devlog – GitHub-powered development journal and content engine
-- **Status**: App shell + timeline UI built, GitHub integration next
+- **Status**: App shell + timeline UI + **GitHub sign-in scaffold** (NextAuth/Prisma/repo picker) in tree; **full GitHub/production pass intentionally deferred** — see `docs/todo-github-integration.md`
 - **Audience (current thesis)**:
   - Indie founders & solo SaaS builders
   - Open-source maintainers
@@ -134,3 +134,24 @@
 - GitHub OAuth + repo connection flow (`feature/github-oauth`).
 - Real `TimelineEntry` objects sourced from GitHub API (commits, PRs, releases).
 - Swap `TIMELINE_ENTRIES` for a server-fetched result passed into `TimelineView`.
+
+---
+
+### Day 5 – GitHub scaffold + intentional pause
+
+**Date**: 2026-03-26
+
+**What happened**
+
+- Landed a **first-pass** GitHub integration: NextAuth (GitHub), Prisma/SQLite, per-user repo selection, optional live commits on the timeline, protected `(app)` routes and `/login`.
+- **Decision:** Treat this as **good enough to keep in the tree** but **not** the final commercial integration. A **later session** (e.g. with a stronger implementation model) should own webhooks, token lifecycle, production Postgres, and hardening.
+
+**Where to look**
+
+- **Big TODO / handoff:** `docs/todo-github-integration.md`
+- **Progress table:** `README.md` → Current Build Status
+- **Coordination:** `docs/agent-worklog.md` → Paused / deferred
+
+**What's next (when resuming)**
+
+- Work from `docs/todo-github-integration.md`; avoid drive-by rewrites until that pass is scheduled.

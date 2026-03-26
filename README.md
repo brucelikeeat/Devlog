@@ -328,27 +328,34 @@ Supporting docs:
 - `docs/architecture.md`
 - `docs/api-contracts.md`
 - `docs/agent-worklog.md`
+- `docs/todo-github-integration.md` — deferred GitHub / production checklist
 - `docs/decisions/`
 
 ---
 
 ## Current Build Status
 
-> Last updated: Mar 19, 2026 · `v0.1.0` · merged into `main`
+> Last updated: Mar 26, 2026 · `v0.1.x` · GitHub scaffold in tree; **full integration pass deferred** (see below)
 
 | Area | Status | Notes |
 |------|--------|-------|
 | Landing page | ✅ Done | Hero, features grid, pricing CTA |
 | App shell | ✅ Done | Sidebar, Topbar, route-group layout |
 | Dashboard | ✅ Prototype | Static placeholder data |
-| Dev Timeline UI | ✅ Done | Fully componentized, fake data, live search + type filter |
-| Settings page | ✅ Prototype | UI shell only |
-| GitHub integration | 🟡 In Progress | OAuth connect, repo picker, commit fetch (no webhooks yet) |
+| Dev Timeline UI | ✅ Done | Fully componentized, fake + optional live commits, live search + type filter |
+| Settings page | ✅ Prototype | Profile + GitHub section (repo picker when signed in) |
+| GitHub integration | ⏸️ Paused / scaffold | NextAuth + Prisma + per-user repo + commits on timeline; **webhooks, hardening, prod DB deferred** — see `docs/todo-github-integration.md` |
 | AI post generator | 🔲 Planned | LLM prompt pipeline |
 | Content editor | 🔲 Planned | Rich text, tone adjustment |
 | Multi-platform publishing | 🔲 Planned | X, LinkedIn, Reddit, Dev.to |
 | Content calendar | 🔲 Planned | Scheduling, drag-and-drop |
 | Analytics | 🔲 Planned | Engagement metrics, growth tracking |
+
+### Deferred: GitHub integration (big TODO)
+
+The repo **keeps** the current GitHub sign-in and repo/commit flow as-is. A **later, dedicated pass** (e.g. with a stronger implementation model) should tackle webhooks, token lifecycle, production database, and the rest of the checklist:
+
+**→ [`docs/todo-github-integration.md`](docs/todo-github-integration.md)**
 
 ## MVP Scope
 

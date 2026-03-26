@@ -4,6 +4,8 @@ This file tracks the public and internal API shapes that multiple features depen
 
 Keep this updated whenever a route contract changes so parallel chats do not drift.
 
+> **GitHub integration:** Current routes match the **paused scaffold** in the repo. A **larger follow-up** (webhooks, security, production DB, etc.) is tracked in **`docs/todo-github-integration.md`** — do not assume this file alone defines final production contracts.
+
 ## Authentication (NextAuth.js)
 
 Sign-in is handled by **NextAuth** under:

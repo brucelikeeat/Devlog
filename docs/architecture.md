@@ -25,6 +25,7 @@ Option A: single application with clear internal boundaries.
 
 - `github`
   - OAuth, repo selection, webhook ingestion, event normalization.
+  - **Progress (Mar 2026):** A first-pass scaffold exists in the app (NextAuth + Prisma + API routes + settings/timeline wiring). A **full production integration** (webhooks, token hardening, etc.) is **deferred**; see `docs/todo-github-integration.md`.
 - `timeline`
   - Internal devlog feed, timeline grouping, progress views.
   - Internal devlog feed, timeline grouping, progress views.

@@ -15,7 +15,14 @@ Every `feature/*` branch must update this file in its first meaningful commit so
 
 | Branch | Owner / Chat | Scope | Files Touched | Status | Notes |
 |--------|---------------|-------|----------------|--------|-------|
-| `feature/github-integration` | GitHub integration chat | NextAuth + Prisma: per-user GitHub sign-in, DB-backed sessions/tokens, repo picker, timeline commits | `prisma/*`, `src/lib/auth.ts`, `src/lib/prisma.ts`, `src/app/api/auth/*`, `src/app/api/github/*`, `src/app/login/*`, `src/server/github/*`, `src/components/github/*`, `(app)/layout`, settings/timeline/sidebar, `docs/api-contracts.md` | in progress | SQLite locally; production: Postgres + same schema. Webhooks not implemented. |
+| — | — | *None — GitHub integration deferred; see `docs/todo-github-integration.md`* | — | — | Resume in a future focused chat when ready. |
+
+## Paused / deferred
+
+| Branch | Scope | Notes |
+|--------|--------|-------|
+| `feature/github-integration` | NextAuth (GitHub) + Prisma + repo picker + timeline commits; login gate on `(app)` | **Code left as-is.** Full production pass deferred — revisit with a stronger model. Checklist: `docs/todo-github-integration.md`. |
+
 ## Completed
 
 | Branch | Merged | Scope | Notes |
