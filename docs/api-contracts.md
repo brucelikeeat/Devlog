@@ -282,6 +282,50 @@ Pure, synchronous — builds the full prompt string used to generate a single Li
 
 ---
 
+### `src/lib/postGenerator/templates/xTemplate.ts`
+
+> Added: **May 4, 2026** *(replaced earlier B.3* stub on the same date)*
+
+Exports `buildXPrompt(event: EnrichedEvent, tone: string): string`.
+
+Pure, synchronous — builds the full prompt string used to generate a single X (Twitter) draft. Does not call any model.
+
+The prompt's central principle: on X, the first 8 words decide whether someone keeps reading. Hook carries the post; everything else supports it.
+
+**Hard requirements enforced by the prompt:**
+
+- **Maximum 260 characters** total, including hashtags. (X's hard limit is 280; the 20-character buffer is for safety.)
+- The first sentence is the hook — the single most interesting or surprising thing about the event.
+- The hook **must NOT** start with `"I"`, `"We"`, or `"Just"`. Lead with the OUTCOME or the PROBLEM.
+- After the hook, at most **1–2 short follow-up lines**.
+- **0–2 hashtags**, relevant and specific. Generic spam tags are explicitly banned: `#coding`, `#developer`, `#tech`, `#programming`, `#software`.
+- Hype openers blocked (`"Excited to share"`, `"Thrilled to announce"`, `"Big news"`, etc.).
+- Single post — never a thread.
+- Self-check loop in the prompt: count characters before responding; if over 260, rewrite shorter and count again. Also re-verify the first word is not `"I"`, `"We"`, or `"Just"`.
+- Returns post text only — no preamble, no character count, no surrounding quotes, no Markdown fences.
+
+**Tone-specific guidance:**
+
+| Tone | Effect |
+|---|---|
+| `"casual"` | Punchy, direct, sentence fragments allowed. |
+| `"professional"` | Complete sentences, measured wording, no slang. |
+| `"feedback-seeking"` | Ends with one short genuine question (≤8 words). |
+| `"educational"` | Leads with the insight — the takeaway IS the hook. |
+| *anything else* | Neutral, punchy, factual. |
+
+**Inputs used:** only `whatChanged`, `outcome`, and `difficulty` (intentionally narrower than LinkedIn/Reddit — keeps the post tight and avoids accidental detail leaks). `whyItMatters` and `technicalDetail` are not injected.
+
+**`difficulty` calibration:**
+
+| Value | Effect |
+|---|---|
+| `"significant"` | Worth letting the post reflect that, but never inflate. |
+| `"moderate"` | Match the size of the change without overselling. |
+| `"trivial"` | Keep the post understated — do not make a small change sound heroic. |
+
+---
+
 ### `src/lib/postGenerator/templates/redditTemplate.ts`
 
 > Added: **May 4, 2026**
@@ -325,3 +369,33 @@ No hashtags, no Markdown code fences, no surrounding quotes.
 **Inputs used:** all five enriched fields — `whatChanged`, `whyItMatters`, `technicalDetail`, `outcome`, and `difficulty` (the last calibrates how big a deal the post should sound; `"trivial"` should not sound heroic).
 
 **Privacy interaction:** if `event.technicalDetail` is empty (high-privacy sanitization), the prompt forbids inventing specifics, file names, or stack traces and keeps the post about experience and outcome.
+
+---
+
+### `src/lib/postGenerator/generatePost.ts`
+
+> Added: **May 4, 2026**
+
+Exports the `Platform` type, the `GeneratedPost` type, and the async function `generatePost(event, platform, tone): Promise<GeneratedPost>`.
+
+```ts
+type Platform = "x" | "linkedin" | "reddit";
+
+type GeneratedPost = {
+  platform:       Platform;
+  content:        string;
+  characterCount: number;
+};
+```
+
+**Behavior:**
+
+1. Reads `ANTHROPIC_API_KEY` from env (trimmed); throws if missing.
+2. Selects the prompt builder for the platform via an exhaustive switch (`buildLinkedInPrompt` / `buildXPrompt` / `buildRedditPrompt`).
+3. Calls `POST https://api.anthropic.com/v1/messages` with model `claude-sonnet-4-6`, `max_tokens: 1000`, headers `x-api-key` + `anthropic-version: 2023-06-01`.
+4. Extracts text from `content[].text` items, trims, and strips Markdown code fences and any surrounding straight or curly quotes.
+5. **X retry:** if `platform === "x"` and the cleaned content exceeds **280** characters, makes one follow-up call that includes the original prompt, the previous assistant response, and a user message:
+   *"The previous response was N characters. Shorten it to under 260 characters while keeping the hook."* Retries **once only**.
+6. Returns `{ platform, content, characterCount: content.length }`.
+
+**Error handling:** every failure path (missing API key, non-2xx Anthropic response, empty content, network throw) is wrapped in `try/catch` and rethrown as `Error("Failed to generate ${platform} post: ${message}")`. The function does **not** silently fall back to placeholder text — callers decide how to surface the error.

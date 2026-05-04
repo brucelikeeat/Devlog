@@ -13,8 +13,10 @@ Entries are **newest first**. Dates use **ISO-style `YYYY-MM-DD`** when known; o
 |------|----------------|
 | Post generator | **Phase A — enrichment layer:** `enrichEvent.ts` (Anthropic Haiku pre-pass), `sanitizeEvent.ts` (privacy levels). |
 | Post generator | **Phase B.1 — LinkedIn prompt template:** `templates/linkedinTemplate.ts` (`buildLinkedInPrompt`) — story-arc structure, tone-aware, ≤2 hashtags, hype-opener block. |
-| Post generator | **Phase B.2 — Reddit prompt template:** `templates/redditTemplate.ts` (`buildRedditPrompt`) — title + body, devlog voice, banned-vocab list, tone-aware, no hashtags, uses `difficulty` for calibration. |
-| Docs | `api-contracts.md` — internal modules for enrich, sanitize, LinkedIn, and Reddit templates documented. |
+| Post generator | **Phase B.2 — X prompt template:** `templates/xTemplate.ts` (`buildXPrompt`) — hook-first (first 8 words), ≤260 char hard cap, no `I`/`We`/`Just` openers, banned generic-spam hashtags, in-prompt char self-check. Replaces earlier same-day stub. |
+| Post generator | **Phase B.3 — Reddit prompt template:** `templates/redditTemplate.ts` (`buildRedditPrompt`) — title + body, devlog voice, banned-vocab list, tone-aware, no hashtags, uses `difficulty` for calibration. *(Renumbered from B.2 → B.3 on the same day when the X template took B.2.)* |
+| Post generator | **Phase C.1 — Core `generatePost`:** `generatePost.ts` (`Platform`, `GeneratedPost`, `generatePost`) — wires enricher + sanitizer + templates → Anthropic `claude-sonnet-4-6`, X retry-once-when-over-280 logic, throws `Failed to generate ${platform} post: ${message}` on any failure. |
+| Docs | `api-contracts.md` — internal modules for enrich, sanitize, LinkedIn template, X template, Reddit template, and `generatePost` documented. |
 
 ---
 

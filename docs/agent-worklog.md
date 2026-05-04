@@ -18,7 +18,8 @@ Dates are the actual session dates from conversation timestamps unless marked *(
 | **2026-05-02** | GitHub OAuth credentials set, `NEXTAUTH_URL` corrected to port 3001 |
 | **2026-05-03** | Auth end-to-end verification — sign-in confirmed working, `access_token` stored in DB |
 | **2026-05-04** | Phase A — Post generator enrichment: event enricher (`A.1`) + privacy sanitizer (`A.2`) |
-| **2026-05-04** | Phase B — Post generator templates: LinkedIn prompt (`B.1`), Reddit prompt (`B.2`) |
+| **2026-05-04** | Phase B — Post generator templates: LinkedIn prompt (`B.1`), X prompt (`B.2`), Reddit prompt (`B.3`) |
+| **2026-05-04** | Phase C — Generation pipeline: core `generatePost` (`C.1`) — wires enricher + sanitizer + templates → Anthropic Sonnet |
 
 ---
 
@@ -48,7 +49,17 @@ Every `feature/*` branch must update this file in its first meaningful commit so
 | Task | Scope | Files | Status | Notes |
 |------|-------|-------|--------|-------|
 | **B.1** — LinkedIn prompt template | Pure prompt builder for LinkedIn drafts (story arc: hook → what built → why it matters → takeaway → soft close) | `src/lib/postGenerator/templates/linkedinTemplate.ts` *(new)* | ✅ done | Exports `buildLinkedInPrompt(event, tone)`. Length 150–300 words, ≤2 hashtags last line, blocks hype openers, tone-specific guidance for casual/professional/feedback-seeking/educational with neutral fallback. Empty `technicalDetail` triggers "do not invent specifics" guard for high-privacy posts. |
-| **B.2** — Reddit prompt template | Pure prompt builder for Reddit drafts (title + body, devlog voice — honest, self-aware, downvote-resistant) | `src/lib/postGenerator/templates/redditTemplate.ts` *(new)* | ✅ done | Exports `buildRedditPrompt(event, tone)`. Title ≤12 words on line 1, blank line, then body (tried → happened → learned → optional question). No hashtags. Banned vocab list (`excited`, `thrilled`, `game-changer`, `journey`, `passionate`, `leverage`, etc.). Tone variants: casual = informal/humor, professional = measured, feedback-seeking = ends with specific technical question, educational = lesson-framed. Always leans honest regardless of tone. Injects all 5 enriched fields including `difficulty` for calibration. |
+| **B.2** — X prompt template | Pure prompt builder for X/Twitter drafts (hook-first; first 8 words decide if reader stops) | `src/lib/postGenerator/templates/xTemplate.ts` *(new)* | ✅ done | Exports `buildXPrompt(event, tone)`. Hard cap **260 chars** (20-char buffer below 280). Hook MUST NOT start with `"I"`, `"We"`, or `"Just"` — lead with outcome or problem. 0–2 specific hashtags (blocks generic spam: `#coding`, `#developer`, `#tech`, `#programming`). Single post, never a thread. Self-check loop in prompt: count chars and rewrite if over 260. Injects only `whatChanged`, `outcome`, `difficulty` (no `whyItMatters` / `technicalDetail` — keeps post tight and avoids leaks). `difficulty` calibrates tone (significant = worth noting, trivial = understated). Tone variants: casual = punchy fragments OK, professional = complete sentences, feedback-seeking = short genuine question, educational = lead with the insight. **Replaces the previous B.3* stub.** |
+| **B.3** — Reddit prompt template | Pure prompt builder for Reddit drafts (title + body, devlog voice — honest, self-aware, downvote-resistant) | `src/lib/postGenerator/templates/redditTemplate.ts` *(new)* | ✅ done | Exports `buildRedditPrompt(event, tone)`. Title ≤12 words on line 1, blank line, then body (tried → happened → learned → optional question). No hashtags. Banned vocab list (`excited`, `thrilled`, `game-changer`, `journey`, `passionate`, `leverage`, etc.). Tone variants: casual = informal/humor, professional = measured, feedback-seeking = ends with specific technical question, educational = lesson-framed. Always leans honest regardless of tone. Injects all 5 enriched fields including `difficulty` for calibration. *(Renumbered from B.2 → B.3 on 2026-05-04.)* |
+
+---
+
+## Phase C — Post Generator: Generation Pipeline
+**2026-05-04**
+
+| Task | Scope | Files | Status | Notes |
+|------|-------|-------|--------|-------|
+| **C.1** — Core `generatePost` | Single function that ties enriched event + platform + tone → one generated post via Anthropic | `src/lib/postGenerator/generatePost.ts` *(new)* | ✅ done | Exports `Platform`, `GeneratedPost` types and `generatePost(event, platform, tone)`. Selects prompt builder via exhaustive `switch`. Calls `claude-sonnet-4-6` at `https://api.anthropic.com/v1/messages` with `max_tokens: 1000`. Cleans output (strips Markdown fences and surrounding quotes). For platform `"x"`: if content > 280 chars, retries ONCE in a multi-turn message asking the model to shorten under 260 while keeping the hook. Wraps everything in try/catch and rethrows as `Failed to generate ${platform} post: ${message}`. Throws (does not silently fall back) so callers can decide. |
 
 ---
 
