@@ -325,6 +325,7 @@ Every `feature/*` branch must update `docs/agent-worklog.md` in its first meanin
 
 Supporting docs:
 
+- `docs/CHANGELOG.md` — dated milestones (start here for “what changed when”)
 - `docs/architecture.md`
 - `docs/api-contracts.md`
 - `docs/agent-worklog.md`
