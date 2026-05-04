@@ -154,11 +154,19 @@ type TimelineEntry = CommitEntry | PrEntry | ReleaseEntry;
 
 ### `POST /api/posts/generate`
 
-> Added: **~May 2026** · Handler: `src/app/api/posts/generate/route.ts`
+> Added: **~May 2026** (Task 4.1) · **Rewritten: 2026-05-04** (Task C.2) · Handler: `src/app/api/posts/generate/route.ts`
 
-Generates platform-specific draft posts from one or more selected timeline entries using the Anthropic API (`claude-opus-4-7`).
+Generates platform-specific draft posts from one or more selected timeline entries by running the full post-generator pipeline:
 
-**Auth:** requires NextAuth session (missing → 401).
+1. Validate body → `400` on malformed input.
+2. `getServerSession` → `401` if no session.
+3. Internal HTTP `GET /api/timeline` (session cookie forwarded). Failure here surfaces as `500` with `detail`.
+4. Filter entries by `timelineEntryIds`. If nothing matches → `400 { error: "No matching timeline entries found" }`.
+5. `enrichEvent()` + `sanitizeEvent()` over **all** matched entries in parallel.
+6. `pickAnchorEvent()` chooses one event to drive generation: highest `difficulty` first, then most recent `dateIso`. *(Why one anchor: see source comment — concatenating multiple events produces muddled, multi-topic posts.)*
+7. `Promise.all` over `platforms` → `generatePost(anchor, platform, tone)` → Anthropic `claude-sonnet-4-6`.
+
+**Auth:** requires NextAuth session (missing → `401`).
 
 **Request body:**
 
@@ -171,20 +179,35 @@ type GeneratePostsRequest = {
 };
 ```
 
-**Response — success (`200`):** `GeneratedPost[]`
+**Response — success (`200`):**
 
 ```ts
 type GeneratedPost = {
-  platform: "x" | "linkedin" | "reddit";
-  content:  string;
+  platform:       "x" | "linkedin" | "reddit";
+  content:        string;
+  characterCount: number;
+};
+
+type GeneratePostsResponse = {
+  posts: GeneratedPost[];
 };
 ```
 
-**Other responses:**
-- `400` if body is malformed or no matching timeline entries are found.
-- `500` on Anthropic failure or empty model response.
+> ⚠️ **Breaking change vs. Task 4.1.** The previous handler returned a **bare** `GeneratedPost[]` without `characterCount`. C.2 wraps the array in `{ posts }` and adds `characterCount` to each post. Any consumer reading the old shape needs to update.
 
-Required env: `ANTHROPIC_API_KEY`
+**Other responses:**
+
+| Status | Body | When |
+|---|---|---|
+| `400` | `{ error: "Invalid request body" }` | Body fails schema validation |
+| `400` | `{ error: "No matching timeline entries found" }` | `timelineEntryIds` filter yields no entries from `/api/timeline` |
+| `401` | `{ error: "Unauthorized" }` | No NextAuth session |
+| `207` | `{ posts: GeneratedPost[], failed: Platform[] }` | Some but not all platforms generated successfully (partial success) |
+| `500` | `{ error: "Failed to generate posts", detail: string }` | All platform generations failed, internal `/api/timeline` error, or any other thrown error |
+
+**Retry behavior (Task C.3):** each platform generation is wrapped in `withRetry(..., 1, platform)` — on failure it waits 500 ms and retries once before logging and returning `null`. Platforms that return `null` end up in the `failed` array.
+
+Required env: `ANTHROPIC_API_KEY` · also reads `NEXTAUTH_URL` to compute the internal `/api/timeline` base URL (falls back to the incoming request's origin).
 
 ---
 
@@ -369,6 +392,24 @@ No hashtags, no Markdown code fences, no surrounding quotes.
 **Inputs used:** all five enriched fields — `whatChanged`, `whyItMatters`, `technicalDetail`, `outcome`, and `difficulty` (the last calibrates how big a deal the post should sound; `"trivial"` should not sound heroic).
 
 **Privacy interaction:** if `event.technicalDetail` is empty (high-privacy sanitization), the prompt forbids inventing specifics, file names, or stack traces and keeps the post about experience and outcome.
+
+---
+
+### `src/lib/postGenerator/withRetry.ts`
+
+> Added: **May 4, 2026**
+
+Exports `withRetry<T>(fn: () => Promise<T>, retries?: number, label?: string): Promise<T | null>`.
+
+Generic retry wrapper used by `POST /api/posts/generate` to isolate per-platform failures without crashing the whole request.
+
+**Behavior:**
+- Calls `fn()`.
+- On throw: waits **500 ms**, then retries up to `retries` times (default `1` — so 2 total attempts).
+- If all attempts throw: logs `[withRetry:${label}] failed after N attempt(s): ${message}` and returns `null` (does **not** rethrow).
+- On success: returns the resolved value of `fn()`.
+
+**Returns `null` instead of throwing** — this is deliberate. Callers (the route) check for `null` to decide between partial success (`207`) and total failure (`500`).
 
 ---
 

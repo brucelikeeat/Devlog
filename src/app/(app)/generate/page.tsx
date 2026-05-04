@@ -125,7 +125,7 @@ export default function GeneratePage() {
         return;
       }
 
-      const generated = (await res.json()) as GeneratedPost[];
+      const { posts: generated } = (await res.json()) as { posts: GeneratedPost[] };
       setPosts(generated);
       const initial: Record<Platform, string> = { x: "", linkedin: "", reddit: "" };
       for (const g of generated) {

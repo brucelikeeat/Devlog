@@ -16,7 +16,10 @@ Entries are **newest first**. Dates use **ISO-style `YYYY-MM-DD`** when known; o
 | Post generator | **Phase B.2 — X prompt template:** `templates/xTemplate.ts` (`buildXPrompt`) — hook-first (first 8 words), ≤260 char hard cap, no `I`/`We`/`Just` openers, banned generic-spam hashtags, in-prompt char self-check. Replaces earlier same-day stub. |
 | Post generator | **Phase B.3 — Reddit prompt template:** `templates/redditTemplate.ts` (`buildRedditPrompt`) — title + body, devlog voice, banned-vocab list, tone-aware, no hashtags, uses `difficulty` for calibration. *(Renumbered from B.2 → B.3 on the same day when the X template took B.2.)* |
 | Post generator | **Phase C.1 — Core `generatePost`:** `generatePost.ts` (`Platform`, `GeneratedPost`, `generatePost`) — wires enricher + sanitizer + templates → Anthropic `claude-sonnet-4-6`, X retry-once-when-over-280 logic, throws `Failed to generate ${platform} post: ${message}` on any failure. |
-| Docs | `api-contracts.md` — internal modules for enrich, sanitize, LinkedIn template, X template, Reddit template, and `generatePost` documented. |
+| API| **Phase C.2 — `POST /api/posts/generate` rewritten:** route now drives the full pipeline (enrich → sanitize → anchor pick → parallel generation). **Response shape changed** from bare `GeneratedPost[]` to `{ posts: GeneratedPost[] }`, and each post now includes `characterCount`. Internal HTTP `fetch /api/timeline` (session cookie forwarded) replaces direct Prisma access. |
+| App | **C.2-followup — Generator UI parse fixed:** `src/app/(app)/generate/page.tsx` now destructures `{ posts }` from the new `{ posts: GeneratedPost[] }` response envelope. One-line data-parsing change only; no UI, state, or other logic altered. |
+| Docs | `api-contracts.md` — `POST /api/posts/generate` rewritten with new pipeline semantics, anchor-event rule, and updated response shape. Internal modules for enrich, sanitize, LinkedIn / X / Reddit templates, and `generatePost` documented. |
+| Post generator | **C.3 — Retry wrapper + error resilience:** `withRetry.ts` (1 retry, 500 ms delay, returns `null` on total failure). Route now returns `207 { posts, failed }` on partial success and `500` only when all platforms fail. |
 
 ---
 

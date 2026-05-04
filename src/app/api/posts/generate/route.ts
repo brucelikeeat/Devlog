@@ -1,25 +1,28 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
-import {
-  fetchRepoCommits,
-  fetchRepoPullRequests,
-  fetchRepoReleases,
-} from "@/lib/github/api";
-import {
-  normalizeCommit,
-  normalizePullRequest,
-  normalizeRelease,
-} from "@/lib/github/normalizeEvents";
 import type { TimelineEntry } from "@/features/timeline/types";
-import { prisma } from "@/lib/prisma";
-import { getGithubAccessTokenForUser } from "@/server/github/getGithubAccessToken";
+import {
+  enrichEvent,
+  type EnrichedEvent,
+} from "@/lib/postGenerator/enrichEvent";
+import { sanitizeEvent } from "@/lib/postGenerator/sanitizeEvent";
+import {
+  generatePost,
+  type GeneratedPost,
+  type Platform,
+} from "@/lib/postGenerator/generatePost";
+import { withRetry } from "@/lib/postGenerator/withRetry";
 
 const PLATFORMS = ["x", "linkedin", "reddit"] as const;
-const TONES = ["casual", "professional", "feedback-seeking", "educational"] as const;
+const TONES = [
+  "casual",
+  "professional",
+  "feedback-seeking",
+  "educational",
+] as const;
 const PRIVACY = ["high", "medium", "low"] as const;
 
-type Platform = (typeof PLATFORMS)[number];
 type Tone = (typeof TONES)[number];
 type Privacy = (typeof PRIVACY)[number];
 
@@ -28,11 +31,6 @@ interface GenerateBody {
   platforms: Platform[];
   tone: Tone;
   privacyLevel: Privacy;
-}
-
-interface GeneratedPost {
-  platform: Platform;
-  content: string;
 }
 
 function isStringArray(v: unknown): v is string[] {
@@ -46,16 +44,22 @@ function parseBody(raw: unknown): GenerateBody | null {
   if (!isStringArray(b.timelineEntryIds) || b.timelineEntryIds.length === 0) {
     return null;
   }
+
   if (
     !Array.isArray(b.platforms) ||
     b.platforms.length === 0 ||
-    !b.platforms.every((p): p is Platform =>
-      typeof p === "string" && (PLATFORMS as readonly string[]).includes(p),
+    !b.platforms.every(
+      (p): p is Platform =>
+        typeof p === "string" && (PLATFORMS as readonly string[]).includes(p),
     )
   ) {
     return null;
   }
-  if (typeof b.tone !== "string" || !(TONES as readonly string[]).includes(b.tone)) {
+
+  if (
+    typeof b.tone !== "string" ||
+    !(TONES as readonly string[]).includes(b.tone)
+  ) {
     return null;
   }
   if (
@@ -73,99 +77,35 @@ function parseBody(raw: unknown): GenerateBody | null {
   };
 }
 
-async function loadTimelineForUser(userId: string): Promise<TimelineEntry[]> {
-  const token = await getGithubAccessTokenForUser(userId);
-  if (!token) return [];
+const DIFFICULTY_RANK: Record<EnrichedEvent["difficulty"], number> = {
+  trivial: 0,
+  moderate: 1,
+  significant: 2,
+};
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { selectedGithubRepo: true },
-  });
-  const selected = user?.selectedGithubRepo ?? null;
-  if (!selected) return [];
-
-  const [owner, repo] = selected.split("/", 2);
-  if (!owner || !repo) return [];
-
-  const [commits, pulls, releases] = await Promise.all([
-    fetchRepoCommits(token, owner, repo),
-    fetchRepoPullRequests(token, owner, repo),
-    fetchRepoReleases(token, owner, repo),
-  ]);
-
-  const repoName = `${owner}/${repo}`;
-  return [
-    ...commits.map((c) => normalizeCommit(c, repoName)),
-    ...pulls.map((p) => normalizePullRequest(p, repoName)),
-    ...releases.map((r) => normalizeRelease(r, repoName)),
-  ];
-}
-
-function buildPrompt(
-  entries: TimelineEntry[],
-  platforms: Platform[],
-  tone: Tone,
-  privacyLevel: Privacy,
-): string {
-  const eventLines = entries
-    .map((e) => `- [${e.type}] ${e.title}: ${e.summary}`)
-    .join("\n");
-
-  return [
-    "You are a developer content writer helping a software developer share their work on social media.",
-    "",
-    "Given these development events:",
-    eventLines,
-    "",
-    `Generate one post per platform for these platforms: ${platforms.join(", ")}.`,
-    `Tone: ${tone}.`,
-    `Privacy level: ${privacyLevel}.`,
-    "- high: no code details, no technical specifics, only high-level outcomes",
-    "- medium: behavior and outcomes only, no implementation details",
-    "- low: full detail including code, architecture, and specifics is fine",
-    "",
-    "Platform guidance:",
-    "- x: max 280 characters, punchy, use 1-2 hashtags",
-    "- linkedin: 3-5 sentences, professional narrative, no hashtag spam",
-    "- reddit: conversational, honest, suitable for a devlog or programming subreddit",
-    "",
-    'Return ONLY a valid JSON array with no extra text: [{"platform": "x", "content": "..."}, ...]',
-  ].join("\n");
-}
-
-function extractJsonArray(text: string): unknown {
-  let candidate = text.trim();
-
-  const fenced = candidate.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-  if (fenced) candidate = fenced[1].trim();
-
-  if (!candidate.startsWith("[")) {
-    const start = candidate.indexOf("[");
-    const end = candidate.lastIndexOf("]");
-    if (start === -1 || end === -1 || end <= start) {
-      throw new Error("Model response did not contain a JSON array.");
-    }
-    candidate = candidate.slice(start, end + 1);
-  }
-
-  return JSON.parse(candidate);
-}
-
-function validatePosts(value: unknown): GeneratedPost[] {
-  if (!Array.isArray(value)) throw new Error("Model output is not an array.");
-  return value.map((item, i) => {
-    if (!item || typeof item !== "object") {
-      throw new Error(`Post ${i} is not an object.`);
-    }
-    const o = item as Record<string, unknown>;
-    if (typeof o.platform !== "string" || typeof o.content !== "string") {
-      throw new Error(`Post ${i} is missing platform/content strings.`);
-    }
-    if (!(PLATFORMS as readonly string[]).includes(o.platform)) {
-      throw new Error(`Post ${i} has unknown platform "${o.platform}".`);
-    }
-    return { platform: o.platform as Platform, content: o.content };
-  });
+/**
+ * Pick the single "anchor" event to drive generation when the user has
+ * selected multiple timeline entries.
+ *
+ * Why one anchor instead of merging all selected events into the prompt:
+ * - Concatenating multiple events into one post tends to produce muddled,
+ *   multi-topic drafts that read like a status report, not a hook.
+ * - Each platform template is tuned to a single thesis (X = one hook,
+ *   LinkedIn = one story arc, Reddit = one title + body).
+ *
+ * Selection rule:
+ *   1. Highest difficulty wins (significant > moderate > trivial).
+ *   2. On a tie, the most recent entry by `dateIso` wins.
+ *
+ * A future task may swap this for a multi-event narrative generator.
+ */
+function pickAnchorEvent(events: EnrichedEvent[]): EnrichedEvent {
+  return [...events].sort((a, b) => {
+    const rankDelta =
+      DIFFICULTY_RANK[b.difficulty] - DIFFICULTY_RANK[a.difficulty];
+    if (rankDelta !== 0) return rankDelta;
+    return b.originalEntry.dateIso.localeCompare(a.originalEntry.dateIso);
+  })[0];
 }
 
 export async function POST(request: Request) {
@@ -179,90 +119,117 @@ export async function POST(request: Request) {
     try {
       raw = await request.json();
     } catch {
-      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-    }
-
-    const body = parseBody(raw);
-    if (!body) {
-      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-    }
-
-    const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
-    if (!apiKey) {
-      console.error("[POST /api/posts/generate] ANTHROPIC_API_KEY is not set.");
       return NextResponse.json(
-        { error: "Failed to generate posts" },
-        { status: 500 },
-      );
-    }
-
-    const allEntries = await loadTimelineForUser(session.user.id);
-    const wanted = new Set(body.timelineEntryIds);
-    const selected = allEntries.filter((e) => wanted.has(e.id));
-
-    if (selected.length === 0) {
-      return NextResponse.json(
-        { error: "No matching timeline entries found." },
+        { error: "Invalid request body" },
         { status: 400 },
       );
     }
 
-    const prompt = buildPrompt(
-      selected,
-      body.platforms,
-      body.tone,
-      body.privacyLevel,
-    );
+    const body = parseBody(raw);
+    if (!body) {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 },
+      );
+    }
 
-    const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-opus-4-7",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: prompt }],
-      }),
+    // Internal HTTP fetch to GET /api/timeline (per task spec). The session
+    // cookie is forwarded so /api/timeline's getServerSession() resolves to
+    // the same user. Base URL prefers NEXTAUTH_URL, falls back to the
+    // incoming request's origin.
+    const reqUrl = new URL(request.url);
+    const baseUrl =
+      process.env.NEXTAUTH_URL?.trim() ||
+      `${reqUrl.protocol}//${reqUrl.host}`;
+    const cookieHeader = request.headers.get("cookie") ?? "";
+
+    const timelineRes = await fetch(`${baseUrl}/api/timeline`, {
+      headers: { cookie: cookieHeader },
+      cache: "no-store",
     });
 
-    if (!anthropicRes.ok) {
-      const errText = await anthropicRes.text();
+    if (!timelineRes.ok) {
       console.error(
-        `[POST /api/posts/generate] Anthropic ${anthropicRes.status}: ${errText}`,
+        `[POST /api/posts/generate] /api/timeline returned ${timelineRes.status}`,
       );
       return NextResponse.json(
-        { error: "Failed to generate posts" },
+        {
+          error: "Failed to generate posts",
+          detail: `Failed to load timeline (HTTP ${timelineRes.status}).`,
+        },
         { status: 500 },
       );
     }
 
-    const payload = (await anthropicRes.json()) as {
-      content?: Array<{ type: string; text?: string }>;
-    };
-    const text =
-      payload.content
-        ?.filter((c) => c.type === "text" && typeof c.text === "string")
-        .map((c) => c.text as string)
-        .join("\n") ?? "";
-
-    if (!text) {
-      console.error("[POST /api/posts/generate] Empty model response.");
+    const allEntries = (await timelineRes.json()) as unknown;
+    if (!Array.isArray(allEntries)) {
       return NextResponse.json(
-        { error: "Failed to generate posts" },
+        {
+          error: "Failed to generate posts",
+          detail: "Timeline response was not an array.",
+        },
         { status: 500 },
       );
     }
 
-    const posts = validatePosts(extractJsonArray(text));
-    return NextResponse.json(posts);
+    const wanted = new Set(body.timelineEntryIds);
+    const selectedEntries = (allEntries as TimelineEntry[]).filter(
+      (e) => wanted.has(e.id),
+    );
+
+    if (selectedEntries.length === 0) {
+      return NextResponse.json(
+        { error: "No matching timeline entries found" },
+        { status: 400 },
+      );
+    }
+
+    const enriched = await Promise.all(
+      selectedEntries.map((entry) => enrichEvent(entry)),
+    );
+    const sanitized = enriched.map((e) =>
+      sanitizeEvent(e, body.privacyLevel),
+    );
+
+    const anchor = pickAnchorEvent(sanitized);
+
+    const results = await Promise.all(
+      body.platforms.map((platform) =>
+        withRetry(() => generatePost(anchor, platform, body.tone), 1, platform),
+      ),
+    );
+
+    const posts: GeneratedPost[] = [];
+    const failed: Platform[] = [];
+    for (let i = 0; i < body.platforms.length; i++) {
+      const result = results[i];
+      if (result !== null) {
+        posts.push(result);
+      } else {
+        failed.push(body.platforms[i]);
+      }
+    }
+
+    if (posts.length === 0) {
+      return NextResponse.json(
+        {
+          error: "Failed to generate posts",
+          detail: `All platform generations failed: ${failed.join(", ")}.`,
+        },
+        { status: 500 },
+      );
+    }
+
+    if (failed.length > 0) {
+      return NextResponse.json({ posts, failed }, { status: 207 });
+    }
+
+    return NextResponse.json({ posts });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[POST /api/posts/generate] failed:", message);
     return NextResponse.json(
-      { error: "Failed to generate posts" },
+      { error: "Failed to generate posts", detail: message },
       { status: 500 },
     );
   }
