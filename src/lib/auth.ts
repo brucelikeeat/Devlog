@@ -7,8 +7,8 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID ?? "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
+      clientId: process.env.GITHUB_CLIENT_ID?.trim() ?? "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET?.trim() ?? "",
       authorization: {
         params: {
           scope: "read:user user:email repo",
@@ -35,5 +35,15 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET?.trim(),
+  logger: {
+    error(code, metadata) {
+      console.error("[NextAuth Error]", code, metadata);
+    },
+  },
+  events: {
+    async signIn(message) {
+      console.log("[NextAuth signIn]", message);
+    },
+  },
 };

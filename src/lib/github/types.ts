@@ -50,6 +50,38 @@ export interface GitHubCommit {
   }[];
 }
 
+export interface GitHubPullRequest {
+  id: number;
+  number: number;
+  title: string;
+  state: string;
+  html_url: string;
+  created_at: string;
+  updated_at: string;
+  merged_at: string | null;
+  user: {
+    login: string;
+    avatar_url: string;
+  };
+  body: string | null;
+}
+
+export interface GitHubRelease {
+  id: number;
+  tag_name: string;
+  name: string | null;
+  draft: boolean;
+  prerelease: boolean;
+  created_at: string;
+  published_at: string | null;
+  html_url: string;
+  body: string | null;
+  author: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
 export interface GitHubTokenResponse {
   access_token: string;
   token_type: string;

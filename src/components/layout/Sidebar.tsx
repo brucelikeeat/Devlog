@@ -6,6 +6,7 @@ import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   GitBranch,
+  Sparkles,
   FileText,
   CalendarDays,
   BarChart3,
@@ -22,6 +23,7 @@ import type { NavItem } from "@/types/nav";
 const mainNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Timeline", href: "/timeline", icon: GitBranch },
+  { label: "Generate", href: "/generate", icon: Sparkles },
   { label: "Content", href: "/content", icon: FileText, disabled: true, soon: true },
   { label: "Calendar", href: "/calendar", icon: CalendarDays, disabled: true, soon: true },
   { label: "Analytics", href: "/analytics", icon: BarChart3, disabled: true, soon: true },

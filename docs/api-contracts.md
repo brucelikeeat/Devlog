@@ -70,6 +70,105 @@ Purpose:
 - Clear `User.selectedGithubRepo` only (stop tracking a repository).
 - Does not remove the GitHub OAuth link; use **Sign out** to end the app session.
 
+### `GET /api/timeline`
+
+Implemented: **May 2026** · Handler: `src/app/api/timeline/route.ts`
+
+Purpose:
+- Return timeline entries for the authenticated user's selected GitHub repo.
+- Fetches commits, PRs, and releases in parallel, normalizes them, and sorts by date descending.
+
+Auth: requires NextAuth session + GitHub access token on the `Account` row (both → 401 if missing).
+
+Response — success (`200`): `TimelineEntry[]` sorted by `dateIso` descending.
+
+```ts
+// src/features/timeline/types.ts — actual discriminated union (not a flat object)
+type EntryType = "commit" | "pr" | "release";
+type PostStatus = "published" | "draft" | null;
+type PrState = "open" | "merged" | "closed";
+
+interface BaseEntry {
+  id: string;
+  title: string;
+  summary: string;
+  repo: string;
+  branch: string;
+  dateIso: string;       // ISO 8601 — used for grouping and sorting
+  displayTime: string;   // human-readable label shown in the card
+  postStatus: PostStatus;
+}
+
+interface CommitEntry extends BaseEntry {
+  type: "commit";
+  hash: string;
+  filesChanged: number;
+  additions: number;
+  deletions: number;
+}
+
+interface PrEntry extends BaseEntry {
+  type: "pr";
+  prNumber: number;
+  state: PrState;
+  labels: string[];
+  commits: number;
+  filesChanged: number;
+}
+
+interface ReleaseEntry extends BaseEntry {
+  type: "release";
+  version: string;
+  highlights: string[];
+  commits: number;
+}
+
+type TimelineEntry = CommitEntry | PrEntry | ReleaseEntry;
+```
+
+Other responses:
+- `200` with `[]` if no repo is selected.
+- `400` if `selectedGithubRepo` is not valid `owner/repo`.
+- `500` with `{ error: "Failed to fetch timeline" }` on unexpected failure.
+
+> **Note:** The `TimelineEntry` shape above (discriminated union with `type`, `repo`, `dateIso`, `postStatus`) is the real implemented shape. An older flat draft (`repoName`, `eventType`, `createdAt`, `privacyLevel`) previously listed here was stale and has been removed.
+
+### `POST /api/posts/generate`
+
+Implemented: **May 2026** · Handler: `src/app/api/posts/generate/route.ts`
+
+Purpose:
+- Generate platform-specific draft posts from one or more selected timeline entries using the Anthropic API (`claude-opus-4-7`).
+
+Auth: requires NextAuth session (→ 401 if missing).
+
+Request body:
+
+```ts
+type GeneratePostsRequest = {
+  timelineEntryIds: string[];                                          // must be non-empty
+  platforms: Array<"x" | "linkedin" | "reddit">;                      // must be non-empty subset
+  tone: "casual" | "professional" | "feedback-seeking" | "educational";
+  privacyLevel: "high" | "medium" | "low";
+};
+```
+
+Response — success (`200`):
+
+```ts
+type GeneratedPost = {
+  platform: "x" | "linkedin" | "reddit";
+  content: string;
+};
+// returns GeneratedPost[]
+```
+
+Other responses:
+- `400` if body is malformed or no matching timeline entries found.
+- `500` on Anthropic failure or empty model response.
+
+Requires env: `ANTHROPIC_API_KEY`
+
 ## Planned Endpoints
 
 ### `POST /api/github/webhook`
@@ -87,46 +186,44 @@ Expected response:
 - `200 OK` for accepted events
 - `4xx` for invalid signatures or malformed payloads
 
-### `GET /api/timeline`
+## Internal Modules
 
-Purpose:
-- Return timeline entries for the authenticated user.
+These are not HTTP endpoints but shared library contracts that multiple features depend on.
 
-Expected response shape:
+### `src/lib/postGenerator/enrichEvent.ts`
+
+Added: **May 4, 2026**
+
+Exports `EnrichedEvent` and `enrichEvent(entry: TimelineEntry): Promise<EnrichedEvent>`.
+
+Calls Anthropic `claude-haiku-4-5-20251001` as a fast pre-pass to expand raw event data before post generation.
 
 ```ts
-type TimelineEntry = {
-  id: string;
-  repoName: string;
-  eventType: "commit" | "pull_request" | "release" | "milestone";
-  title: string;
-  summary: string;
-  privacyLevel: "high" | "medium" | "low";
-  createdAt: string;
+type EnrichmentDifficulty = "trivial" | "moderate" | "significant";
+
+type EnrichedEvent = {
+  originalEntry: TimelineEntry;
+  whatChanged: string;      // what was actually built or fixed
+  whyItMatters: string;     // user-facing or developer-facing impact
+  technicalDetail: string;  // implementation specifics (filtered later by privacy level)
+  outcome: string;          // what is now possible that wasn't before
+  difficulty: EnrichmentDifficulty;
 };
 ```
 
-### `POST /api/posts/generate`
+Fallback behavior: if `ANTHROPIC_API_KEY` is missing, Anthropic returns non-2xx, or JSON parsing fails, all fields fall back to values derived from the entry (`title`, `summary`). Never throws.
 
-Purpose:
-- Generate platform-specific drafts from one or more timeline events.
+### `src/lib/postGenerator/sanitizeEvent.ts`
 
-Expected request shape:
+Added: **May 4, 2026**
 
-```ts
-type GeneratePostsRequest = {
-  timelineEntryIds: string[];
-  platforms: Array<"x" | "linkedin" | "reddit">;
-  tone: "casual" | "professional" | "feedback-seeking" | "educational";
-  privacyLevel: "high" | "medium" | "low";
-};
-```
+Exports `sanitizeEvent(event: EnrichedEvent, privacyLevel: "high" | "medium" | "low"): EnrichedEvent`.
 
-Expected response shape:
+Pure, synchronous, no AI calls.
 
-```ts
-type GeneratedPost = {
-  platform: "x" | "linkedin" | "reddit";
-  content: string;
-};
-```
+| Privacy level | Behavior |
+|---|---|
+| `"high"` | Blanks `technicalDetail`. Redacts file paths, function calls, variable tokens, and error messages in `whatChanged` and `outcome` with `[internal detail]`. |
+| `"medium"` | Replaces `technicalDetail` with `"Implementation details hidden."`. Strips inline code, fenced code blocks, and stack-trace lines from all text fields. |
+| `"low"` | Returns the event unchanged. |
+
