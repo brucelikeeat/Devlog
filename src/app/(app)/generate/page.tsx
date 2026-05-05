@@ -6,6 +6,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { EventSelector } from "@/components/postGenerator/EventSelector";
 import { OptionsPanel } from "@/components/postGenerator/OptionsPanel";
 import { ResultsPanel } from "@/components/postGenerator/ResultsPanel";
+import GeneratingOverlay from "@/components/postGenerator/loading/GeneratingOverlay";
 import { cn } from "@/lib/utils/cn";
 import type { TimelineEntry } from "@/features/timeline/types";
 
@@ -146,11 +147,6 @@ export default function GeneratePage() {
 
       setPosts(data.posts);
       setPartialFailures(data.failed ?? []);
-
-      // Scroll to results after a frame so the DOM has updated
-      requestAnimationFrame(() => {
-        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -192,6 +188,13 @@ export default function GeneratePage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      <GeneratingOverlay
+        isVisible={generating}
+        onComplete={() => {
+          resultsRef.current?.scrollIntoView({ behavior: "smooth" });
+        }}
+      />
+
       <Topbar
         title="Generate Posts"
         description="Turn your recent dev events into shareable content"
