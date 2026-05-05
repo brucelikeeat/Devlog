@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import {
@@ -52,12 +53,13 @@ export function Sidebar() {
           className="flex items-center gap-2.5 group"
           title="Back to home"
         >
-          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-violet-500 transition-colors group-hover:bg-violet-400">
-            <span className="font-mono text-[11px] font-bold text-white tracking-tight">DL</span>
-          </div>
-          <span className="font-semibold text-zinc-100 tracking-tight group-hover:text-violet-300 transition-colors">
-            Devlog
-          </span>
+          <Image
+            src="/devlog-logo.png"
+            alt="Devlog"
+            width={96}
+            height={32}
+            className="h-8 w-auto transition-opacity group-hover:opacity-80"
+          />
         </Link>
         <button type="button" className="ml-auto text-zinc-600 hover:text-zinc-400 transition-colors">
           <ChevronDown className="h-3.5 w-3.5" />

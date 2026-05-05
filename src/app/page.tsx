@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import PlatformMarquee from "@/components/landing/PlatformMarquee";
 import {
   GitBranch,
   Zap,
@@ -19,11 +21,15 @@ export default function LandingPage() {
       {/* Navbar */}
       <nav className="fixed inset-x-0 top-0 z-50 h-14 border-b border-zinc-800/50 bg-zinc-950/85 backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-violet-500">
-              <span className="font-mono text-[11px] font-bold text-white">DL</span>
-            </div>
-            <span className="font-semibold tracking-tight text-zinc-100">Devlog</span>
+          <div className="flex items-center">
+            <Image
+              src="/devlog-logo.png"
+              alt="Devlog"
+              width={108}
+              height={36}
+              className="h-9 w-auto"
+              priority
+            />
           </div>
 
           <div className="hidden items-center gap-7 text-sm text-zinc-400 md:flex">
@@ -127,23 +133,7 @@ export default function LandingPage() {
       </section>
 
       {/* Platforms */}
-      <section className="border-t border-zinc-800 px-6 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="mb-7 font-mono text-[11px] uppercase tracking-widest text-zinc-600">
-            Publish to
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {platforms.map((p) => (
-              <div
-                key={p}
-                className="rounded-full border border-zinc-800 bg-zinc-900/50 px-4 py-1.5 text-sm text-zinc-400"
-              >
-                {p}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <PlatformMarquee />
 
       {/* CTA / Pricing */}
       <section id="pricing" className="border-t border-zinc-800 px-6 py-28">
@@ -179,11 +169,14 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-zinc-800 px-6 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-2">
-            <div className="flex h-5 w-5 items-center justify-center rounded bg-violet-500">
-              <span className="font-mono text-[9px] font-bold text-white">DL</span>
-            </div>
-            <span className="text-sm text-zinc-500">Devlog</span>
+          <div className="flex items-center">
+            <Image
+              src="/devlog-logo.png"
+              alt="Devlog"
+              width={80}
+              height={27}
+              className="h-7 w-auto opacity-60"
+            />
           </div>
           <p className="text-xs text-zinc-700">
             Built by developers who believe distribution is as important as code.
