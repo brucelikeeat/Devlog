@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Circle, Github, ArrowRight, GitCommit, CheckCircle2, Zap } from "lucide-react";
+import { Circle, Github, ArrowRight } from "lucide-react";
+import AnimatedTerminal from "@/components/landing/AnimatedTerminal";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 
@@ -188,56 +189,7 @@ export function LandingHero() {
 
         {/* Terminal mockup */}
         <FadeUp delay={1.02} className="mx-auto mt-16 max-w-2xl">
-          <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] shadow-2xl shadow-black/60 text-left backdrop-blur-sm">
-            {/* Window chrome */}
-            <div className="flex items-center gap-1.5 border-b border-white/[0.06] bg-white/[0.02] px-4 py-2.5">
-              <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
-              <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
-              <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
-              <span className="ml-2 font-mono text-[11px] text-white/25">
-                devlog · activity feed
-              </span>
-            </div>
-
-            {/* Content */}
-            <div className="space-y-4 p-5 font-mono text-sm">
-              <div className="flex items-start gap-3">
-                <GitCommit className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400/80" />
-                <div>
-                  <div className="text-amber-400/80">
-                    commit detected
-                    <span className="ml-2 text-white/25">· startup-validator</span>
-                  </div>
-                  <div className="mt-0.5 text-white/40">
-                    &quot;Implemented startup scoring algorithm&quot;
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-400/80" />
-                <div>
-                  <span className="text-violet-400/80">AI analyzing</span>
-                  <span className="text-white/25"> · generating outcome-focused summary...</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400/80" />
-                <div>
-                  <div className="text-emerald-400/80">
-                    post generated
-                    <span className="ml-2 text-white/25">· X (Twitter)</span>
-                  </div>
-                  <div className="mt-0.5 leading-relaxed text-white/60">
-                    &quot;Day 14 building my AI startup validator. Just shipped
-                    the scoring engine — it now evaluates ideas across market
-                    size, competition & founder fit...&quot;
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AnimatedTerminal />
         </FadeUp>
       </div>
 
