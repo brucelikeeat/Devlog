@@ -2,18 +2,9 @@ import Link from "next/link";
 import PlatformMarquee from "@/components/landing/PlatformMarquee";
 import GitGraphBackground from "@/components/landing/GitGraphBackground";
 import DevlogLogo from "@/components/brand/DevlogLogo";
-import {
-  GitBranch,
-  Zap,
-  BarChart3,
-  ArrowRight,
-  Github,
-  CheckCircle2,
-  FileText,
-  CalendarDays,
-  Lock,
-  GitPullRequest,
-} from "lucide-react";
+import FeaturesSection from "@/components/landing/FeaturesSection";
+import PricingSection from "@/components/landing/PricingSection";
+import { Github } from "lucide-react";
 import { LandingHero } from "@/components/ui/shape-landing-hero";
 
 export default function LandingPage() {
@@ -64,36 +55,9 @@ export default function LandingPage() {
       </div>
 
       {/* Features */}
-      <section id="features" className="relative z-10 px-6 py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-14 text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight">
-              Everything you need to build in public
-            </h2>
-            <p className="mx-auto max-w-xl text-zinc-400">
-              Devlog handles the full pipeline from GitHub activity to published
-              content — without exposing your core IP.
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="group rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 transition-colors hover:border-zinc-700 hover:bg-zinc-900/70"
-              >
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-800 transition-colors group-hover:bg-zinc-700/60">
-                  <feature.icon className="h-5 w-5 text-violet-400" />
-                </div>
-                <h3 className="mb-2 font-semibold text-zinc-100">{feature.title}</h3>
-                <p className="text-sm leading-relaxed text-zinc-400">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div id="features" className="relative z-10">
+        <FeaturesSection />
+      </div>
 
       {/* How it works */}
       <section id="how-it-works" className="relative z-10 border-t border-zinc-800 px-6 py-24">
@@ -136,34 +100,8 @@ export default function LandingPage() {
       </div>
 
       {/* CTA / Pricing */}
-      <section id="pricing" className="relative z-10 border-t border-zinc-800 px-6 py-28">
-        <div className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/60 p-12 text-center">
-          <div className="absolute inset-0 bg-hero-glow opacity-60" />
-          <div className="relative">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/80 px-3 py-1 text-xs text-zinc-400">
-              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-              No auto-posting — always your review first
-            </div>
-            <h2 className="mb-4 text-4xl font-bold tracking-tight">
-              Start building in public today.
-            </h2>
-            <p className="mb-8 text-zinc-400">
-              Connect one repo for free. Devlog will start turning your commits
-              into content immediately.
-            </p>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-lg bg-violet-500 px-6 py-3 font-medium text-white transition-colors hover:bg-violet-400"
-            >
-              <Github className="h-4 w-4" />
-              Get started free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <p className="mt-4 text-xs text-zinc-600">
-              Free tier · 1 repo included · No credit card required
-            </p>
-          </div>
-        </div>
+      <section id="pricing" className="relative z-10 border-t border-white/5">
+        <PricingSection />
       </section>
 
       {/* Footer */}
@@ -185,51 +123,6 @@ export default function LandingPage() {
     </div>
   );
 }
-
-const features = [
-  {
-    icon: GitBranch,
-    title: "GitHub Activity Intelligence",
-    description:
-      "Monitors commits, PRs, releases, and milestones. Focuses on meaningful product progress so content tells outcomes, not implementation details.",
-  },
-  {
-    icon: Zap,
-    title: "AI Post Generator",
-    description:
-      "Each detected event generates platform-optimized posts with the right tone for X, LinkedIn, Reddit, Indie Hackers, and dev blogs.",
-  },
-  {
-    icon: GitPullRequest,
-    title: "Dev Timeline",
-    description:
-      "An interactive timeline of your entire build journey. Review progress, track milestones, and see your output — even if you never post publicly.",
-  },
-  {
-    icon: FileText,
-    title: "Content Editor",
-    description:
-      "Review and refine every post before it goes out. Rich editing, tone adjustment, AI regeneration, and thread splitting for X.",
-  },
-  {
-    icon: CalendarDays,
-    title: "Content Calendar",
-    description:
-      "Schedule posts with drag-and-drop. Multi-platform visibility, queue management, and recurring update templates.",
-  },
-  {
-    icon: Lock,
-    title: "Privacy Controls",
-    description:
-      "Per-repo privacy levels keep your core IP private. High, medium, or low — you control exactly what detail appears in generated content.",
-  },
-  {
-    icon: BarChart3,
-    title: "Growth Analytics",
-    description:
-      "Track content performance across platforms. Engagement, impressions, follower growth, and best-performing posts at a glance.",
-  },
-];
 
 const steps = [
   {
