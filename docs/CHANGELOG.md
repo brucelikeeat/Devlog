@@ -20,7 +20,14 @@ Entries are **newest first**. Dates use **ISO-style `YYYY-MM-DD`** when known; o
 | App | **C.2-followup — Generator UI parse fixed:** `src/app/(app)/generate/page.tsx` now destructures `{ posts }` from the new `{ posts: GeneratedPost[] }` response envelope. One-line data-parsing change only; no UI, state, or other logic altered. |
 | Docs | `api-contracts.md` — `POST /api/posts/generate` rewritten with new pipeline semantics, anchor-event rule, and updated response shape. Internal modules for enrich, sanitize, LinkedIn / X / Reddit templates, and `generatePost` documented. |
 | Post generator | **C.3 — Retry wrapper + error resilience:** `withRetry.ts` (1 retry, 500 ms delay, returns `null` on total failure). Route now returns `207 { posts, failed }` on partial success and `500` only when all platforms fail. |
+| UI | **D.1 — `EventSelector` component:** `src/components/postGenerator/EventSelector.tsx` — selectable timeline event cards; amber/violet/blue/emerald badges by type; summary truncated at 100 chars; "Select all / Deselect all" toggle; keyboard accessible. |
 
+| UI | **D.2 — `OptionsPanel` component:** `src/components/postGenerator/OptionsPanel.tsx` — platform toggles (colored dots), 4-option tone selector with descriptions, 3-option privacy selector (emerald/amber/red accent per risk level). Fully controlled, `aria-pressed` on all toggles. |
+
+
+| UI | **D.3 — `ResultsPanel` component:** `src/components/postGenerator/ResultsPanel.tsx` — auto-resize textareas, X char counter (red >280, amber >90%), clipboard copy with 2s "Copied!" feedback, per-platform Regenerate button with spinner. |
+
+| UI | **D.4 — Generate page wired up:** `src/app/(app)/generate/page.tsx` rewritten — two-column desktop layout, all three D-components composed, generate + per-platform regenerate handlers, 207 partial-failure warning, scroll-to-results, loading skeleton. Sidebar nav unchanged (already had Generate). |
 ---
 
 ## 2026-05 (month; see `agent-worklog` for task IDs)

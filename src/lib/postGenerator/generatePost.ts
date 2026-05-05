@@ -97,6 +97,7 @@ export async function generatePost(
   platform: Platform,
   tone: string,
 ): Promise<GeneratedPost> {
+  console.log("[generatePost] calling API for platform:", platform);
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
     if (!apiKey) {
@@ -126,6 +127,7 @@ export async function generatePost(
       characterCount: content.length,
     };
   } catch (err) {
+    console.error("[generatePost] failed:", platform, err);
     const message = err instanceof Error ? err.message : String(err);
     throw new Error(`Failed to generate ${platform} post: ${message}`);
   }

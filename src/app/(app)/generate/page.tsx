@@ -1,331 +1,322 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Topbar } from "@/components/layout/Topbar";
-import type { TimelineEntry } from "@/features/timeline/types";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
+import { Topbar } from "@/components/layout/Topbar";
+import { EventSelector } from "@/components/postGenerator/EventSelector";
+import { OptionsPanel } from "@/components/postGenerator/OptionsPanel";
+import { ResultsPanel } from "@/components/postGenerator/ResultsPanel";
 import { cn } from "@/lib/utils/cn";
+import type { TimelineEntry } from "@/features/timeline/types";
+
+// ── Types ──────────────────────────────────────────────────────────────────
 
 type Platform = "x" | "linkedin" | "reddit";
 type Tone = "casual" | "professional" | "feedback-seeking" | "educational";
-type Privacy = "high" | "medium" | "low";
+type PrivacyLevel = "high" | "medium" | "low";
 
-interface GeneratedPost {
+type GeneratedPost = {
   platform: Platform;
   content: string;
-}
-
-const PLATFORMS: { value: Platform; label: string }[] = [
-  { value: "x", label: "X (Twitter)" },
-  { value: "linkedin", label: "LinkedIn" },
-  { value: "reddit", label: "Reddit" },
-];
-
-const TONES: { value: Tone; label: string; desc: string }[] = [
-  { value: "casual", label: "Casual", desc: "Conversational and friendly" },
-  { value: "professional", label: "Professional", desc: "Polished, clear narrative" },
-  { value: "feedback-seeking", label: "Feedback-seeking", desc: "Invite reactions and thoughts" },
-  { value: "educational", label: "Educational", desc: "Teach something from your experience" },
-];
-
-const PRIVACY_LEVELS: { value: Privacy; label: string; desc: string }[] = [
-  { value: "high", label: "High", desc: "Outcomes only, no technical detail" },
-  { value: "medium", label: "Medium", desc: "Behavior & outcomes, no implementation" },
-  { value: "low", label: "Low", desc: "Full detail — code, architecture, specifics" },
-];
-
-const PLATFORM_LABELS: Record<Platform, string> = {
-  x: "X (Twitter)",
-  linkedin: "LinkedIn",
-  reddit: "Reddit",
+  characterCount: number;
 };
 
-function entryLabel(entry: TimelineEntry): string {
-  const badge = entry.type === "commit" ? "commit" : entry.type === "pr" ? "PR" : "release";
-  return `[${badge}] ${entry.title}`;
+type GenerateResponse =
+  | { posts: GeneratedPost[]; failed?: Platform[] }
+  | { error: string; detail?: string };
+
+// ── Loading skeleton ───────────────────────────────────────────────────────
+
+function EventSkeleton() {
+  return (
+    <div className="space-y-2 animate-pulse">
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          className="h-20 rounded-xl border border-zinc-800 bg-zinc-900/40"
+        />
+      ))}
+    </div>
+  );
 }
 
+// ── Page ───────────────────────────────────────────────────────────────────
+
 export default function GeneratePage() {
-  const [events, setEvents] = useState<TimelineEntry[]>([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
-  const [eventsError, setEventsError] = useState<string | null>(null);
+  // ── Data ──
+  const [entries, setEntries] = useState<TimelineEntry[]>([]);
+  const [loadingEntries, setLoadingEntries] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<Platform>>(new Set());
-  const [tone, setTone] = useState<Tone>("professional");
-  const [privacy, setPrivacy] = useState<Privacy>("medium");
+  // ── Selections ──
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [platforms, setPlatforms] = useState<Platform[]>(["linkedin"]);
+  const [tone, setTone] = useState<Tone>("casual");
+  const [privacyLevel, setPrivacyLevel] = useState<PrivacyLevel>("medium");
 
-  const [generating, setGenerating] = useState(false);
-  const [generateError, setGenerateError] = useState<string | null>(null);
+  // ── Generation ──
   const [posts, setPosts] = useState<GeneratedPost[]>([]);
-  const [postContents, setPostContents] = useState<Record<Platform, string>>({
-    x: "",
-    linkedin: "",
-    reddit: "",
-  });
+  const [generating, setGenerating] = useState(false);
+  const [regenerating, setRegenerating] = useState<Platform[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [partialFailures, setPartialFailures] = useState<Platform[]>([]);
+
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  // ── Load timeline ──────────────────────────────────────────────────────
 
   useEffect(() => {
     async function load() {
       try {
         const res = await fetch("/api/timeline");
         if (!res.ok) {
-          setEventsError("Could not load events. Make sure you have a GitHub repo selected in Settings.");
+          setLoadError(
+            "Could not load events. Make sure you have a GitHub repo selected in Settings.",
+          );
           return;
         }
         const data: unknown = await res.json();
-        setEvents(Array.isArray(data) ? (data as TimelineEntry[]) : []);
+        setEntries(Array.isArray(data) ? (data as TimelineEntry[]) : []);
       } catch {
-        setEventsError("Network error loading events.");
+        setLoadError("Network error loading events.");
       } finally {
-        setLoadingEvents(false);
+        setLoadingEntries(false);
       }
     }
     load();
   }, []);
 
-  function toggleId(id: string) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  // ── Helpers ────────────────────────────────────────────────────────────
+
+  function buildRequestBody(overridePlatforms: Platform[]) {
+    return {
+      timelineEntryIds: selectedIds,
+      platforms: overridePlatforms,
+      tone,
+      privacyLevel,
+    };
   }
 
-  function togglePlatform(p: Platform) {
-    setSelectedPlatforms((prev) => {
-      const next = new Set(prev);
-      next.has(p) ? next.delete(p) : next.add(p);
-      return next;
-    });
+  function mergeIntoPost(
+    prev: GeneratedPost[],
+    incoming: GeneratedPost[],
+  ): GeneratedPost[] {
+    const map = new Map(prev.map((p) => [p.platform, p]));
+    for (const p of incoming) map.set(p.platform, p);
+    return Array.from(map.values());
   }
 
-  const canGenerate = selectedIds.size > 0 && selectedPlatforms.size > 0;
+  async function callGenerateApi(
+    body: object,
+  ): Promise<GenerateResponse | null> {
+    const res = await fetch("/api/posts/generate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = (await res.json().catch(() => null)) as GenerateResponse | null;
+
+    if (!res.ok && res.status !== 207) {
+      return data;
+    }
+    return data;
+  }
+
+  // ── Generate all ───────────────────────────────────────────────────────
+
+  const canGenerate = selectedIds.length > 0 && platforms.length > 0;
 
   async function handleGenerate() {
-    if (!canGenerate) return;
+    if (!canGenerate || generating) return;
     setGenerating(true);
-    setGenerateError(null);
-    setPosts([]);
+    setError(null);
+    setPartialFailures([]);
 
     try {
-      const res = await fetch("/api/posts/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          timelineEntryIds: Array.from(selectedIds),
-          platforms: Array.from(selectedPlatforms),
-          tone,
-          privacyLevel: privacy,
-        }),
-      });
+      const data = await callGenerateApi(buildRequestBody(platforms));
 
-      if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as { error?: string } | null;
-        setGenerateError(body?.error ?? "Generation failed. Please try again.");
+      if (!data || "error" in data) {
+        setError(
+          (data as { error?: string } | null)?.error ??
+            "Generation failed. Please try again.",
+        );
         return;
       }
 
-      const { posts: generated } = (await res.json()) as { posts: GeneratedPost[] };
-      setPosts(generated);
-      const initial: Record<Platform, string> = { x: "", linkedin: "", reddit: "" };
-      for (const g of generated) {
-        initial[g.platform] = g.content;
-      }
-      setPostContents(initial);
+      setPosts(data.posts);
+      setPartialFailures(data.failed ?? []);
+
+      // Scroll to results after a frame so the DOM has updated
+      requestAnimationFrame(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } catch {
-      setGenerateError("Network error. Please try again.");
+      setError("Network error. Please try again.");
     } finally {
       setGenerating(false);
     }
   }
 
+  // ── Regenerate one platform ────────────────────────────────────────────
+
+  async function handleRegenerate(platform: Platform) {
+    if (regenerating.includes(platform)) return;
+    setRegenerating((prev) => [...prev, platform]);
+    setError(null);
+
+    try {
+      const data = await callGenerateApi(buildRequestBody([platform]));
+
+      if (!data || "error" in data) {
+        setError(
+          (data as { error?: string } | null)?.error ??
+            `Failed to regenerate ${platform} post.`,
+        );
+        return;
+      }
+
+      setPosts((prev) => mergeIntoPost(prev, data.posts));
+      // Remove platform from failures if it now succeeded
+      if (data.posts.some((p) => p.platform === platform)) {
+        setPartialFailures((prev) => prev.filter((f) => f !== platform));
+      }
+    } catch {
+      setError(`Network error regenerating ${platform} post.`);
+    } finally {
+      setRegenerating((prev) => prev.filter((p) => p !== platform));
+    }
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Topbar
         title="Generate Posts"
         description="Turn your recent dev events into shareable content"
       />
-      <main className="flex-1 p-6 animate-fade-in space-y-8 max-w-3xl">
 
-        {/* Step 1 — Select events */}
-        <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
-            1 — Select events
-          </h2>
-          {loadingEvents ? (
-            <div className="flex items-center gap-2 text-sm text-zinc-500">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading events…
-            </div>
-          ) : eventsError ? (
-            <p className="text-sm text-amber-400">{eventsError}</p>
-          ) : events.length === 0 ? (
-            <p className="text-sm text-zinc-500">
-              No events found.{" "}
-              <a href="/settings" className="text-violet-400 hover:text-violet-300 transition-colors">
-                Connect a repo in Settings
-              </a>{" "}
-              to get started.
-            </p>
-          ) : (
-            <div className="space-y-1.5">
-              {events.map((e) => (
-                <label
-                  key={e.id}
-                  className={cn(
-                    "flex cursor-pointer items-start gap-3 rounded-md border px-3 py-2.5 text-sm transition-colors",
-                    selectedIds.has(e.id)
-                      ? "border-violet-500/40 bg-violet-500/5 text-zinc-200"
-                      : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300",
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 accent-violet-500"
-                    checked={selectedIds.has(e.id)}
-                    onChange={() => toggleId(e.id)}
-                  />
-                  <span className="min-w-0 truncate">{entryLabel(e)}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </section>
+      <main className="flex-1 animate-fade-in p-6">
+        <div className="mx-auto max-w-6xl">
 
-        {/* Step 2 — Platforms */}
-        <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
-            2 — Platforms
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {PLATFORMS.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => togglePlatform(value)}
-                className={cn(
-                  "rounded-md border px-4 py-2 text-sm font-medium transition-colors",
-                  selectedPlatforms.has(value)
-                    ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
-                    : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300",
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </section>
+          {/* Two-column grid on large screens */}
+          <div className="grid gap-8 lg:grid-cols-[1fr,1.25fr]">
 
-        {/* Step 3 — Tone */}
-        <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
-            3 — Tone
-          </h2>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {TONES.map(({ value, label, desc }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setTone(value)}
-                className={cn(
-                  "flex flex-col items-start rounded-md border px-3 py-2.5 text-left transition-colors",
-                  tone === value
-                    ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
-                    : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300",
-                )}
-              >
-                <span className="text-sm font-medium">{label}</span>
-                <span className="mt-0.5 text-[11px] text-zinc-600">{desc}</span>
-              </button>
-            ))}
-          </div>
-        </section>
+            {/* ── Left: event selector ── */}
+            <section className="min-w-0">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
+                1 — Select events
+              </h2>
 
-        {/* Step 4 — Privacy */}
-        <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
-            4 — Privacy level
-          </h2>
-          <div className="grid grid-cols-3 gap-2">
-            {PRIVACY_LEVELS.map(({ value, label, desc }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setPrivacy(value)}
-                className={cn(
-                  "flex flex-col items-start rounded-md border px-3 py-2.5 text-left transition-colors",
-                  privacy === value
-                    ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
-                    : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300",
-                )}
-              >
-                <span className="text-sm font-medium">{label}</span>
-                <span className="mt-0.5 text-[11px] text-zinc-600">{desc}</span>
-              </button>
-            ))}
-          </div>
-        </section>
+              {loadingEntries ? (
+                <EventSkeleton />
+              ) : loadError ? (
+                <p className="text-sm text-amber-400">{loadError}</p>
+              ) : entries.length === 0 ? (
+                <p className="text-sm text-zinc-500">
+                  No events yet.{" "}
+                  <a
+                    href="/settings"
+                    className="text-violet-400 transition-colors hover:text-violet-300"
+                  >
+                    Connect a GitHub repo in Settings
+                  </a>{" "}
+                  to get started.
+                </p>
+              ) : (
+                <EventSelector
+                  entries={entries}
+                  selectedIds={selectedIds}
+                  onChange={setSelectedIds}
+                />
+              )}
+            </section>
 
-        {/* Generate button */}
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={!canGenerate || generating}
-          className={cn(
-            "flex items-center gap-2 rounded-md px-5 py-2.5 text-sm font-semibold transition-colors",
-            canGenerate && !generating
-              ? "bg-violet-600 text-white hover:bg-violet-500"
-              : "cursor-not-allowed bg-zinc-800 text-zinc-600",
-          )}
-        >
-          {generating ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Generating…
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4" />
-              Generate Posts
-            </>
-          )}
-        </button>
+            {/* ── Right: options + action + results ── */}
+            <section className="min-w-0 space-y-8">
 
-        {generateError && (
-          <p className="text-sm text-red-400">{generateError}</p>
-        )}
-
-        {/* Generated posts */}
-        {posts.length > 0 && (
-          <section className="space-y-6 border-t border-zinc-800 pt-8">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
-              Generated posts
-            </h2>
-            {posts.map(({ platform }) => (
-              <div key={platform}>
-                <label className="mb-1.5 block text-sm font-medium text-zinc-300">
-                  {PLATFORM_LABELS[platform]}
-                  {platform === "x" && (
-                    <span className="ml-2 text-xs text-zinc-600">
-                      {postContents[platform].length}/280
-                    </span>
-                  )}
-                </label>
-                <textarea
-                  value={postContents[platform]}
-                  onChange={(e) =>
-                    setPostContents((prev) => ({
-                      ...prev,
-                      [platform]: e.target.value,
-                    }))
-                  }
-                  rows={platform === "x" ? 4 : 7}
-                  className="w-full resize-none rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-700 outline-none transition-colors focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20"
+              {/* Options */}
+              <div>
+                <h2 className="mb-4 text-xs font-semibold uppercase tracking-widest text-zinc-500">
+                  2 — Options
+                </h2>
+                <OptionsPanel
+                  selectedPlatforms={platforms}
+                  tone={tone}
+                  privacyLevel={privacyLevel}
+                  onPlatformsChange={setPlatforms}
+                  onToneChange={(t) => setTone(t as Tone)}
+                  onPrivacyChange={(l) => setPrivacyLevel(l as PrivacyLevel)}
                 />
               </div>
-            ))}
-          </section>
-        )}
+
+              {/* Generate button */}
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={!canGenerate || generating}
+                  className={cn(
+                    "flex w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-colors sm:w-auto",
+                    canGenerate && !generating
+                      ? "bg-violet-600 text-white hover:bg-violet-500"
+                      : "cursor-not-allowed bg-zinc-800 text-zinc-600",
+                  )}
+                >
+                  {generating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating…
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Generate Posts
+                    </>
+                  )}
+                </button>
+
+                {!canGenerate && !generating && (
+                  <p className="text-[11px] text-zinc-600">
+                    {selectedIds.length === 0
+                      ? "Select at least one event to continue."
+                      : "Select at least one platform to continue."}
+                  </p>
+                )}
+
+                {error && (
+                  <p className="text-sm text-red-400">{error}</p>
+                )}
+              </div>
+
+              {/* Results */}
+              {(posts.length > 0 || partialFailures.length > 0) && (
+                <div ref={resultsRef} className="space-y-4">
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+                    3 — Generated posts
+                  </h2>
+
+                  {partialFailures.length > 0 && (
+                    <p className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-xs text-amber-400">
+                      Generation failed for:{" "}
+                      <span className="font-medium">
+                        {partialFailures.join(", ")}
+                      </span>
+                      . Use Regenerate on any card below, or try again.
+                    </p>
+                  )}
+
+                  <ResultsPanel
+                    posts={posts}
+                    regenerating={regenerating}
+                    onRegenerate={handleRegenerate}
+                  />
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
       </main>
     </div>
   );

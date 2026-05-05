@@ -192,6 +192,7 @@ export async function enrichEvent(entry: TimelineEntry): Promise<EnrichedEvent> 
     const fields = coerceEnrichment(parsed, entry);
     return { originalEntry: entry, ...fields };
   } catch (err) {
+    console.error("[enrichEvent] failed:", err);
     const message = err instanceof Error ? err.message : String(err);
     console.error(
       `[enrichEvent] Failed to enrich entry ${entry.id}: ${message}`,
