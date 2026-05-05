@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
+import DevlogLogo from "@/components/brand/DevlogLogo";
 import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard,
@@ -53,12 +53,10 @@ export function Sidebar() {
           className="flex items-center gap-2.5 group"
           title="Back to home"
         >
-          <Image
-            src="/devlog-logo.png"
-            alt="Devlog"
-            width={96}
-            height={32}
-            className="h-8 w-auto transition-opacity group-hover:opacity-80"
+          <DevlogLogo
+            width={120}
+            color="#6B35D9"
+            className="transition-opacity group-hover:opacity-80"
           />
         </Link>
         <button type="button" className="ml-auto text-zinc-600 hover:text-zinc-400 transition-colors">

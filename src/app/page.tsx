@@ -1,6 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 import PlatformMarquee from "@/components/landing/PlatformMarquee";
+import GitGraphBackground from "@/components/landing/GitGraphBackground";
+import DevlogLogo from "@/components/brand/DevlogLogo";
 import {
   GitBranch,
   Zap,
@@ -17,19 +18,14 @@ import { LandingHero } from "@/components/ui/shape-landing-hero";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="relative min-h-screen overflow-hidden bg-[#0D0D12] text-zinc-100">
+      <GitGraphBackground />
+
       {/* Navbar */}
-      <nav className="fixed inset-x-0 top-0 z-50 h-14 border-b border-zinc-800/50 bg-zinc-950/85 backdrop-blur-md">
+      <nav className="fixed inset-x-0 top-0 z-50 h-14 border-b border-zinc-800/50 bg-[#0D0D12]/85 backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
           <div className="flex items-center">
-            <Image
-              src="/devlog-logo.png"
-              alt="Devlog"
-              width={108}
-              height={36}
-              className="h-9 w-auto"
-              priority
-            />
+            <DevlogLogo width={140} color="#6B35D9" />
           </div>
 
           <div className="hidden items-center gap-7 text-sm text-zinc-400 md:flex">
@@ -63,10 +59,12 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero — animated with framer-motion shapes */}
-      <LandingHero />
+      <div className="relative z-10">
+        <LandingHero />
+      </div>
 
       {/* Features */}
-      <section id="features" className="px-6 py-24">
+      <section id="features" className="relative z-10 px-6 py-24">
         <div className="mx-auto max-w-6xl">
           <div className="mb-14 text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight">
@@ -98,7 +96,7 @@ export default function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="border-t border-zinc-800 px-6 py-24">
+      <section id="how-it-works" className="relative z-10 border-t border-zinc-800 px-6 py-24">
         <div className="mx-auto max-w-4xl">
           <div className="mb-14 text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight">
@@ -133,10 +131,12 @@ export default function LandingPage() {
       </section>
 
       {/* Platforms */}
-      <PlatformMarquee />
+      <div className="relative z-10">
+        <PlatformMarquee />
+      </div>
 
       {/* CTA / Pricing */}
-      <section id="pricing" className="border-t border-zinc-800 px-6 py-28">
+      <section id="pricing" className="relative z-10 border-t border-zinc-800 px-6 py-28">
         <div className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/60 p-12 text-center">
           <div className="absolute inset-0 bg-hero-glow opacity-60" />
           <div className="relative">
@@ -167,16 +167,10 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-800 px-6 py-8">
+      <footer className="relative z-10 border-t border-zinc-800 px-6 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center">
-            <Image
-              src="/devlog-logo.png"
-              alt="Devlog"
-              width={80}
-              height={27}
-              className="h-7 w-auto opacity-60"
-            />
+          <div className="flex items-center opacity-50">
+            <DevlogLogo width={100} color="#6B35D9" />
           </div>
           <p className="text-xs text-zinc-700">
             Built by developers who believe distribution is as important as code.
