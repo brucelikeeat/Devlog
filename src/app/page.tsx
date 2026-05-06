@@ -4,12 +4,14 @@ import GitGraphBackground from "@/components/landing/GitGraphBackground";
 import DevlogLogo from "@/components/brand/DevlogLogo";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import PricingSection from "@/components/landing/PricingSection";
+import ScrollRevealInit from "@/components/landing/ScrollRevealInit";
 import { Github } from "lucide-react";
 import { LandingHero } from "@/components/ui/shape-landing-hero";
 
 export default function LandingPage() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0D0D12] text-zinc-100">
+      <ScrollRevealInit />
       <GitGraphBackground />
 
       {/* Navbar */}
@@ -63,19 +65,36 @@ export default function LandingPage() {
       <section id="how-it-works" className="relative z-10 border-t border-zinc-800 px-6 py-24">
         <div className="mx-auto max-w-4xl">
           <div className="mb-14 text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight reveal reveal-up">
               Ship code. Devlog handles the rest.
             </h2>
-            <p className="text-zinc-400">
+            <p className="text-zinc-400 reveal reveal-up delay-1">
               A three-step pipeline from commit to content.
             </p>
           </div>
 
           <div className="grid gap-10 md:grid-cols-3 md:gap-6">
             {steps.map((step, i) => (
-              <div key={step.title} className="flex gap-4">
+              <div
+                key={step.title}
+                className={`flex gap-4 reveal ${
+                  i === 0
+                    ? "reveal-left delay-1"
+                    : i === 1
+                    ? "reveal-up delay-2"
+                    : "reveal-right delay-3"
+                }`}
+              >
                 <div className="flex flex-col items-center">
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-violet-500/30 bg-violet-500/10 font-mono text-sm font-bold text-violet-400">
+                  <div
+                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-mono text-sm font-bold border ${
+                      i === 0
+                        ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                        : i === 1
+                        ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                        : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    }`}
+                  >
                     {i + 1}
                   </div>
                   {i < steps.length - 1 && (

@@ -45,6 +45,57 @@
   }
 }
 
+/* ── Hero shimmer drift ─────────────────────────────────────────────────────── */
+@keyframes shimmer-drift {
+  0%   { transform: translate(0%, 0%) rotate(0deg); }
+  33%  { transform: translate(2%, -1%) rotate(0.5deg); }
+  66%  { transform: translate(-1%, 2%) rotate(-0.3deg); }
+  100% { transform: translate(0%, 0%) rotate(0deg); }
+}
+
+/* ── Scroll reveal ──────────────────────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeSlideLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeSlideRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.reveal {
+  opacity: 0;
+}
+.reveal.in-view {
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-duration: 0.7s;
+}
+.reveal-up.in-view    { animation-name: fadeSlideUp; }
+.reveal-left.in-view  { animation-name: fadeSlideLeft; }
+.reveal-right.in-view { animation-name: fadeSlideRight; }
+.reveal-fade.in-view  { animation-name: fadeIn;    animation-duration: 0.9s; }
+.reveal-scale.in-view { animation-name: scaleIn;   animation-duration: 0.7s; }
+
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+.delay-5 { animation-delay: 0.40s; }
+.delay-6 { animation-delay: 0.48s; }
+
 @layer utilities {
   /* Dot-grid hero background */
   .bg-dot-grid {

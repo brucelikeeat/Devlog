@@ -18,7 +18,10 @@ type Platform = (typeof PLATFORMS)[number];
 
 function PillCard({ platform }: { platform: Platform }) {
   return (
-    <div className="flex flex-shrink-0 items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-sm">
+    <div
+      className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-sm"
+      style={{ flexShrink: 0 }}
+    >
       <span
         style={{
           color: platform.color,
@@ -48,30 +51,35 @@ export default function PlatformMarquee() {
         }
       `}</style>
 
-      <p className="mb-8 text-center text-xs font-medium uppercase tracking-[0.2em] text-white/30">
+      <p className="mb-8 text-center text-xs font-medium uppercase tracking-[0.2em] text-white/30 reveal reveal-fade">
         Publish to
       </p>
 
       <div
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        className="reveal reveal-up delay-1"
       >
         <div
           style={{
             overflow: "hidden",
+            width: "100%",
             maskImage:
-              "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+              "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
             WebkitMaskImage:
-              "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+              "linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)",
           }}
         >
           <div
             style={{
               display: "flex",
-              gap: "16px",
+              flexDirection: "row",
+              flexWrap: "nowrap",
               width: "max-content",
+              gap: "16px",
               animation: "marquee 28s linear infinite",
               animationPlayState: isHovered ? "paused" : "running",
+              willChange: "transform",
             }}
           >
             {DOUBLED.map((platform, i) => (

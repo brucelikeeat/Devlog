@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { Github } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
-import { TimelineView } from "@/components/timeline";
+import ConstellationTimeline from "@/components/timeline/ConstellationTimeline";
 import { authOptions } from "@/lib/auth";
 import { fetchTimelineEntries } from "@/server/timeline/fetchTimelineEntries";
 
@@ -32,7 +32,6 @@ export default async function TimelinePage() {
 
   const entries = result.ok ? result.entries : [];
   const fetchError = !result.ok && result.reason === "fetch_error";
-  const noRepo = result.ok && entries.length === 0;
   const repoName = session.user.selectedGithubRepo ?? null;
 
   return (
@@ -61,22 +60,8 @@ export default async function TimelinePage() {
               Could not load events. Check your GitHub connection in Settings.
             </p>
           </div>
-        ) : noRepo ? (
-          <div className="mt-24 text-center">
-            <p className="text-sm text-zinc-500">
-              No events yet. Connect a GitHub repo in Settings to get started.
-            </p>
-            <p className="mt-2">
-              <a
-                href="/settings"
-                className="text-sm text-violet-400 transition-colors hover:text-violet-300"
-              >
-                Go to Settings →
-              </a>
-            </p>
-          </div>
         ) : (
-          <TimelineView entries={entries} />
+          <ConstellationTimeline entries={entries} />
         )}
       </main>
     </div>

@@ -61,30 +61,42 @@ export default function PricingSection() {
     <section className="mx-auto max-w-5xl px-4 py-24">
       {/* Heading */}
       <div className="mb-12 text-center">
-        <h2 className="mb-4 text-4xl font-bold text-white">
+        <h2 className="mb-4 text-4xl font-bold text-white reveal reveal-up">
           Simple, honest pricing
         </h2>
-        <p className="mx-auto max-w-md text-lg text-white/50">
+        <p className="mx-auto max-w-md text-lg text-white/50 reveal reveal-up delay-1">
           Start free. Upgrade when Devlog becomes part of your workflow.
         </p>
 
         {/* Annual / Monthly toggle */}
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <span className={`text-sm transition-colors duration-200 ${!annual ? "text-white" : "text-white/40"}`}>
+        <div className="mt-8 flex items-center justify-center gap-3 reveal reveal-fade delay-2">
+          <span
+            className={`text-sm ${!annual ? "text-white" : "text-white/40"}`}
+            style={{ transition: "color 0.3s cubic-bezier(0.4, 0, 0.2, 1)" }}
+          >
             Monthly
           </span>
           <button
             onClick={() => setAnnual((a) => !a)}
             aria-label="Toggle billing period"
-            className="relative h-6 w-12 rounded-full transition-colors duration-300"
-            style={{ background: annual ? "#7C3AED" : "rgba(255,255,255,0.1)" }}
+            className="relative h-6 w-12 rounded-full"
+            style={{
+              background: annual ? "#7C3AED" : "rgba(255,255,255,0.1)",
+              transition: "background 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
           >
             <div
-              className="absolute top-1 h-4 w-4 rounded-full bg-white transition-all duration-300"
-              style={{ left: annual ? "28px" : "4px" }}
+              className="absolute top-1 h-4 w-4 rounded-full bg-white"
+              style={{
+                left: annual ? "28px" : "4px",
+                transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
             />
           </button>
-          <span className={`text-sm transition-colors duration-200 ${annual ? "text-white" : "text-white/40"}`}>
+          <span
+            className={`text-sm ${annual ? "text-white" : "text-white/40"}`}
+            style={{ transition: "color 0.3s cubic-bezier(0.4, 0, 0.2, 1)" }}
+          >
             Annual
             <span className="ml-2 rounded-full border border-green-400/20 bg-green-400/10 px-2 py-0.5 text-xs font-medium text-green-400">
               Save 28%
@@ -97,7 +109,7 @@ export default function PricingSection() {
       <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2">
 
         {/* ── FREE CARD ─────────────────────────────────────── */}
-        <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-8">
+        <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-8 reveal reveal-left delay-2">
           {/* Plan label + price */}
           <div className="mb-6">
             <p className="mb-2 text-sm font-medium uppercase tracking-widest text-white/50">
@@ -113,7 +125,8 @@ export default function PricingSection() {
           {/* CTA */}
           <a
             href="/login"
-            className="mb-8 w-full rounded-xl border border-white/15 py-3 text-center text-sm font-medium text-white/80 transition-all duration-200 hover:border-white/30 hover:text-white"
+            className="mb-8 w-full rounded-xl border border-white/15 py-3 text-center text-sm font-medium text-white/80 hover:border-white/30 hover:text-white"
+            style={{ transition: "all 0.28s cubic-bezier(0.4, 0, 0.2, 1)" }}
           >
             Get started free
           </a>
@@ -148,7 +161,7 @@ export default function PricingSection() {
 
         {/* ── PRO CARD ──────────────────────────────────────── */}
         <div
-          className="relative flex flex-col overflow-hidden rounded-2xl p-8"
+          className="relative flex flex-col overflow-hidden rounded-2xl p-8 reveal reveal-right delay-3"
           style={{
             background:
               "linear-gradient(135deg, rgba(124,58,237,0.15) 0%, rgba(124,58,237,0.05) 100%)",
@@ -180,7 +193,11 @@ export default function PricingSection() {
               Pro
             </p>
             <div className="flex items-end gap-2">
-              <span className="text-5xl font-bold text-white transition-all duration-300">
+              <span
+                key={annual ? "annual" : "monthly"}
+                className="text-5xl font-bold text-white"
+                style={{ animation: "fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both" }}
+              >
                 {annual ? "$10" : "$14"}
               </span>
               <span className="mb-2 text-white/40">/ month</span>
@@ -195,10 +212,11 @@ export default function PricingSection() {
           {/* CTA */}
           <a
             href="/login"
-            className="relative mb-8 w-full rounded-xl py-3 text-center text-sm font-semibold text-white transition-all duration-200"
+            className="relative mb-8 w-full rounded-xl py-3 text-center text-sm font-semibold text-white"
             style={{
               background: "linear-gradient(135deg, #7C3AED, #6D28D9)",
               boxShadow: "0 4px 20px rgba(124,58,237,0.4)",
+              transition: "all 0.28s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.boxShadow =

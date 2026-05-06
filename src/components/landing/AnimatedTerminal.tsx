@@ -57,7 +57,7 @@ export default function AnimatedTerminal() {
 
   const postTyped = useTypewriter(
     scenario.generatedPost,
-    18,
+    25,
     0,
     stage === "generating" || stage === "done",
   );
@@ -125,7 +125,7 @@ export default function AnimatedTerminal() {
       {/* Body */}
       <div
         className="min-h-[220px] space-y-5 p-5"
-        style={{ opacity: visible ? 1 : 0, transition: "opacity 0.4s ease" }}
+        style={{ opacity: visible ? 1 : 0, transition: "opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)" }}
       >
         {/* Stage 1 — commit detected */}
         {showCommit && (

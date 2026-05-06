@@ -128,7 +128,15 @@ export default function FeaturesSection() {
           }}
           className="mb-16 text-center"
         >
-          <h2 className="mb-4 text-4xl font-bold text-white">
+          <h2
+            className="mb-4 text-4xl font-bold"
+            style={{
+              background: "linear-gradient(180deg, #ffffff 60%, rgba(167,139,250,0.7) 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
             Everything you need to build in public
           </h2>
           <p className="mx-auto max-w-xl text-white/50">
