@@ -264,7 +264,13 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[generate] FAILED at unknown step:", error);
     return NextResponse.json(
-      { error: "Failed to generate posts", detail: String(error) },
+      {
+        error: "Failed to generate posts",
+        detail:
+          process.env.NODE_ENV !== "production"
+            ? String(error)
+            : "See server logs for details.",
+      },
       { status: 500 },
     );
   }
