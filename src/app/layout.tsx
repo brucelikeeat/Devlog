@@ -5,12 +5,15 @@ import { AppProviders } from "@/components/providers/AppProviders";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: {
-    default: "Devlog — Turn your commits into content",
-    template: "%s · Devlog",
-  },
+  title: "Devlog — Turn your commits into content",
   description:
-    "Devlog connects your GitHub activity to an AI content engine that generates platform-ready posts for X, LinkedIn, and more — automatically.",
+    "Devlog monitors your GitHub activity and generates platform-optimized posts for X, LinkedIn, Reddit and more. Build in public without the overhead.",
+  openGraph: {
+    title: "Devlog — Turn your commits into content",
+    description:
+      "AI-powered developer content from your GitHub activity.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
