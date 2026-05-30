@@ -11,8 +11,8 @@ Tracks launch-phase milestones across all phases. Agents check boxes and append 
 | 1.1 | Read current state (schema, .env, prisma.ts, package.json) | ✅ done |
 | 1.2 | Update `datasource` block in `schema.prisma` to `postgresql` + `directUrl` | ✅ done |
 | 1.3 | Audit model fields — add `@db.Text` to OAuth token fields | ✅ done |
-| 1.4 | Verify `.env` has `DATABASE_URL` and `DIRECT_URL` | ⚠️ blocked — see Agent Log |
-| 1.5 | Run `prisma migrate dev --name switch-to-postgres` | ⚠️ blocked — see Agent Log |
+| 1.4 | Verify `.env` has `DATABASE_URL` and `DIRECT_URL` | ✅ done |
+| 1.5 | Run `prisma migrate dev --name switch-to-postgres` | ✅ done |
 | 1.6 | Run `prisma generate` + `next build` — confirm no Prisma errors | ✅ done |
 
 ---
@@ -55,31 +55,33 @@ Tracks launch-phase milestones across all phases. Agents check boxes and append 
 
 #### Step 1.4 — .env status
 
-**BLOCKED — manual action required.**
+**✅ COMPLETE.**
 
-The `.env` file did not exist in this environment. It was created with correctly-structured placeholder URLs. You must replace both placeholders with your real Supabase connection strings before running the migration:
+Real Supabase connection strings added to `.env` on **2026-05-30**:
+- `DATABASE_URL` — Transaction pooler (`aws-1-us-east-2.pooler.supabase.com:6543`, IPv4 compatible)
+- `DIRECT_URL` — Session pooler (`aws-1-us-east-2.pooler.supabase.com:5432`, IPv4 compatible)
 
-1. Go to Supabase dashboard → your project → **Settings → Database → Connection string**
-2. Copy the **Transaction pooler** URL (port **6543**) → set as `DATABASE_URL`
-3. Copy the **Direct connection** URL (port **5432**) → set as `DIRECT_URL`
-
-`.env` format:
-```
-DATABASE_URL="postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres"
-```
+Note: The Supabase dashboard shows the direct connection (port 5432 on `db.tziipxidkvyijwwvqrdl.supabase.co`) as "Not IPv4 compatible." The session pooler on the same host as the transaction pooler was used for `DIRECT_URL` instead — this is the correct approach for Prisma migrations when not on an IPv6 or IPv4-addon plan. The `&` in the password was percent-encoded as `%26` in both URLs.
 
 #### Step 1.5 — Migration result
 
-**BLOCKED** — migration failed because `.env` contained placeholder (invalid) URLs:
+**✅ COMPLETE.**
+
+The old SQLite migration history (`prisma/migrations/20260326051942_init/`) was removed since Prisma cannot migrate across provider types. A new PostgreSQL-native migration was created from scratch:
+
 ```
-Error: P1013: The provided database string is invalid. invalid domain character in database URL.
+migrations/
+  └─ 20260530210226_init_postgres/
+    └─ migration.sql
 ```
-Once real Supabase URLs are in `.env`, run:
-```bash
-npx prisma migrate dev --name switch-to-postgres
-```
-This will create a new migration in `prisma/migrations/` and apply it to Supabase. The existing `20260326051942_init` SQLite migration will be superseded.
+
+Migration applied successfully to Supabase. All 4 NextAuth tables created with correct PostgreSQL types:
+- `Account` — `refresh_token`, `access_token`, `id_token` as `TEXT` (from `@db.Text`)
+- `Session` — `expires` as `TIMESTAMP(3)`
+- `User` — `emailVerified` as `TIMESTAMP(3)`, `selectedGithubRepo` as `TEXT`
+- `VerificationToken` — `expires` as `TIMESTAMP(3)`, both unique indexes applied
+
+`npx next build` — ✅ passes cleanly after migration.
 
 #### Step 1.6 — prisma generate + next build
 
@@ -235,7 +237,22 @@ Checked all 5 files explicitly:
 
 ---
 
-## Phase 3 — (pending)
+## Phase 3 — Environment & Auth Verification
+
+| Step | Description | Status |
+|------|-------------|--------|
+| 3.1 | Verify Supabase tables exist and schema matches Prisma | 🔲 pending |
+| 3.2 | Set all required env vars in production environment (Vercel / host) | 🔲 pending |
+| 3.3 | Verify GitHub OAuth end-to-end — sign in, session created in DB | 🔲 pending |
+| 3.4 | Verify `selectedGithubRepo` persists correctly across sessions | 🔲 pending |
+| 3.5 | Verify timeline loads from real GitHub API (commits, PRs, releases) | 🔲 pending |
+| 3.6 | Verify post generation end-to-end (enrich → sanitize → generate) | 🔲 pending |
+
+---
+
+### Agent Log — Phase 3
+
+*(no entries yet)*
 
 ---
 
