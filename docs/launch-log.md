@@ -235,6 +235,77 @@ Checked all 5 files explicitly:
 
 ---
 
+---
+
+### Agent Log — Phase 2 Followup
+
+**Date:** 2026-05-30
+**Branch:** `launch/phase-2-followup`
+
+#### Task 1 — Delete debug-session route
+
+| Action | Detail |
+|--------|--------|
+| Deleted | `src/app/api/debug-session/route.ts` |
+| Deleted | `src/app/api/debug-session/` (directory) |
+| References search | Zero references to `debug-session` found anywhere in `src/` — no import cleanup needed |
+
+#### Task 2 — Add try/catch to route handlers
+
+All 5 unprotected handlers wrapped. `[...nextauth]/route.ts` confirmed — `NODE_ENV` guard from Phase 2 is intact, no try/catch needed.
+
+| File | Change |
+|------|--------|
+| `src/app/api/github/disconnect/route.ts` | Full handler wrapped in try/catch; catch logs `[github/disconnect] error:` and returns `{ error: "Internal server error" }` 500 |
+| `src/app/api/github/select-repo/route.ts` | Full handler wrapped in try/catch; catch logs `[github/select-repo] error:` and returns 500 |
+| `src/app/api/github/status/route.ts` | Full handler wrapped in try/catch; catch logs `[github/status] error:` and returns 500 |
+| `src/app/api/github/repos/route.ts` | Full handler wrapped in outer try/catch; existing inner error handling for GitHub API calls folded in; catch logs `[github/repos] error:` |
+| `src/app/api/github/repos/[owner]/[repo]/commits/route.ts` | Same pattern as repos; catch logs `[github/commits] error:` |
+
+No existing logic changed — only wrapping added.
+
+#### Task 3 — Delete 9 dead files
+
+Note: the prompt listed `src/lib/github/mapCommitsToTimeline.ts` but the actual path is `src/features/github/mapCommitsToTimeline.ts`. Correct path was used.
+
+| File deleted | Bytes | Reason |
+|-------------|-------|--------|
+| `src/features/github/mapCommitsToTimeline.ts` | 1 531 | Superseded by `normalizeEvents.ts` |
+| `src/features/timeline/data.ts` | 9 440 | Fake prototype data — real data comes from GitHub API |
+| `src/lib/github/index.ts` | 349 | Unused barrel — all imports go directly to submodules |
+| `src/lib/github/oauth.ts` | 1 616 | Dead — OAuth handled by NextAuth; none of its 3 exports used |
+| `src/components/timeline/TimelineView.tsx` | 1 092 | Superseded by ConstellationTimeline |
+| `src/components/timeline/TimelineList.tsx` | 4 259 | Only used by TimelineView (deleted) |
+| `src/components/timeline/TimelineFilters.tsx` | 3 102 | Only used by TimelineView (deleted) |
+| `src/components/ui/timeline.tsx` | 16 161 | Only used by TimelineView (deleted) |
+| `src/features/timeline/useTimelineFilter.ts` | 1 290 | Only used by TimelineView (deleted) |
+
+**Import fix required:**
+`src/components/timeline/index.ts` exported `TimelineView`, `TimelineList`, and `TimelineFilters` — all now deleted. Exports for those three removed; `TimelineEntryCard` export retained (file still exists and is legitimately kept).
+
+#### Task 4 — Clean up .env
+
+| Key removed | From |
+|-------------|------|
+| `OPENAI_API_KEY=` | `.env` |
+| `REDIS_URL=redis://localhost:6379` | `.env` |
+| `OPENAI_API_KEY=` | `.env.example` |
+| `REDIS_URL=redis://localhost:6379` | `.env.example` |
+
+Search confirmed: neither `OPENAI_API_KEY` nor `REDIS_URL` appears anywhere in `src/`. Safe to remove.
+
+#### Build status
+
+`npx next build` — **✅ PASS** — 15 routes compiled (was 16; `/api/debug-session` correctly removed).
+
+Two `console.error` lines appear during build for `github/repos` and `github/status` — these are the new try/catch handlers firing during Next.js's static pre-render attempt (it tries to call dynamic API routes at build time, hits the `getServerSession` headers call, and the catch block intercepts the `DYNAMIC_SERVER_USAGE` error). This is expected and harmless; both routes are correctly marked as dynamic (ƒ) in the final output. This was previously an unhandled crash; the try/catch is now correctly catching it.
+
+#### Issues needing attention
+
+None. All tasks completed cleanly.
+
+---
+
 ## Phase 3 — (pending)
 
 ---
