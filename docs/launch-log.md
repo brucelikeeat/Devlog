@@ -237,7 +237,22 @@ Checked all 5 files explicitly:
 
 ---
 
-## Phase 3 — (pending)
+## Phase 3 — Environment & Auth Verification
+
+| Step | Description | Status |
+|------|-------------|--------|
+| 3.1 | Verify Supabase tables exist and schema matches Prisma | 🔲 pending |
+| 3.2 | Set all required env vars in production environment (Vercel / host) | 🔲 pending |
+| 3.3 | Verify GitHub OAuth end-to-end — sign in, session created in DB | 🔲 pending |
+| 3.4 | Verify `selectedGithubRepo` persists correctly across sessions | 🔲 pending |
+| 3.5 | Verify timeline loads from real GitHub API (commits, PRs, releases) | 🔲 pending |
+| 3.6 | Verify post generation end-to-end (enrich → sanitize → generate) | 🔲 pending |
+
+---
+
+### Agent Log — Phase 3
+
+*(no entries yet)*
 
 ---
 
