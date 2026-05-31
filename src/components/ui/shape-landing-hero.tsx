@@ -216,7 +216,7 @@ export function LandingHero() {
         {/* CTAs */}
         <FadeUp delay={0.84} className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
-            href="/dashboard"
+            href="/login"
             className="flex items-center gap-2 font-semibold text-white"
             style={{
               background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%)",

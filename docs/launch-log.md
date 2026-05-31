@@ -256,4 +256,65 @@ Checked all 5 files explicitly:
 
 ---
 
-## Phase 4 — (pending)
+## Phase 4 — Pre-deploy Quality Pass
+
+| Step | Description | Status |
+|------|-------------|--------|
+| 4.1 | Run `npx next build` — confirm zero errors | ✅ done |
+| 4.2 | Confirm metadata export in `src/app/layout.tsx` (title, description, openGraph) | ✅ done |
+| 4.3 | Confirm auth protection on `src/app/(app)/layout.tsx` | ✅ done |
+| 4.4 | Add rate limiting (10 s cooldown) to `src/app/api/posts/generate/route.ts` | ✅ done |
+| 4.5 | Audit landing page auth CTAs — fix any linking to dead routes | ✅ done |
+| 4.6 | Audit codebase for `/calendar` and `/analytics` links — fix nav components | ✅ done |
+| 4.7 | Run final `npx next build` — must pass cleanly | ✅ done |
+
+---
+
+### Agent Log — Phase 4
+
+**Date:** 2026-05-30
+**Branch:** `launch/phase-4-quality`
+
+#### Files changed
+
+| File | Change |
+|------|--------|
+| `src/app/layout.tsx` | Updated `metadata` export: title changed to plain string `"Devlog — Turn your commits into content"`, description updated to match spec, `openGraph` block added with title, description, and `type: "website"` |
+| `src/app/api/posts/generate/route.ts` | Added in-memory rate limiter: `lastRequest` Map at module scope; 10 s per-user cooldown check immediately after session validation, returns HTTP 429 on violation |
+| `src/components/ui/shape-landing-hero.tsx` | Hero "Connect GitHub — it's free" CTA: `href="/dashboard"` → `href="/login"` |
+| `src/components/layout/Sidebar.tsx` | Disabled nav items (Content, Calendar, Analytics): `href="/content"`, `href="/calendar"`, `href="/analytics"` → `href="#"` to prevent accidental routing if the `disabled` guard is ever removed |
+
+#### Check-by-check results
+
+**Check 1 — Initial build**
+`npx next build` passed cleanly before any changes. Zero errors, zero type errors.
+
+**Check 2 — Metadata**
+`src/app/layout.tsx` had the correct title string but a different description and no `openGraph` block. Fixed: description updated to spec, `openGraph` block added.
+
+**Check 3 — Auth protection**
+`src/app/(app)/layout.tsx` already calls `getServerSession(authOptions)` and `redirect("/login")` on no session. No change needed. ✅
+
+**Check 4 — Rate limiting**
+`src/app/api/posts/generate/route.ts` had no rate limiting. Added `lastRequest` Map and 10 s cooldown per user ID returning HTTP 429 on violation.
+
+**Check 5 — Landing page auth links**
+- "Connect GitHub — it's free" (hero CTA) linked to `/dashboard` → fixed to `/login`.
+- Navbar: "Sign in" → `/login` ✅, "Get started" → `/login` ✅.
+- PricingSection: "Get started free" → `/login` ✅, "Start Pro free for 7 days →" → `/login` ✅.
+- Non-auth links reported (not fixed): footer "Privacy" and "Terms" use `href="#"` (placeholder legal pages, not auth CTAs).
+
+**Check 6 — Disabled features**
+`/calendar` and `/analytics` found only in `src/components/layout/Sidebar.tsx` `mainNavItems` data array. The `SidebarNavLink` component renders a `<div>` (not a `<Link>`) for `disabled: true` items, so these routes were never reachable. Hrefs changed to `#` as a defensive fix.
+
+**Check 7 — Final build**
+`npx next build` passes cleanly with zero errors after all changes.
+
+#### Issues & Blockers
+
+- `src/app/api/debug-session/route.ts` — unauthenticated endpoint that returns full session data. Flagged in Phase 2 (Audit D). Not removed per Phase 2 instructions ("report only"). Should be removed before production traffic.
+- Footer "Privacy" and "Terms" links use `href="#"` — placeholder legal pages not yet created.
+
+---
+
+Phase 4 complete — ready for manual Vercel deployment
