@@ -1,6 +1,8 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
+
+const lastRequest = new Map<string, number>();
 import { prisma } from "@/lib/prisma";
 import type { TimelineEntry } from "@/features/timeline/types";
 import {
@@ -129,6 +131,16 @@ export async function POST(request: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const now = Date.now();
+    const last = lastRequest.get(session.user.id) ?? 0;
+    if (now - last < 10000) {
+      return NextResponse.json(
+        { error: "Please wait a moment before generating again." },
+        { status: 429 },
+      );
+    }
+    lastRequest.set(session.user.id, now);
 
     let raw: unknown;
     try {
@@ -264,7 +276,13 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[generate] FAILED at unknown step:", error);
     return NextResponse.json(
-      { error: "Failed to generate posts", detail: String(error) },
+      {
+        error: "Failed to generate posts",
+        detail:
+          process.env.NODE_ENV !== "production"
+            ? String(error)
+            : "See server logs for details.",
+      },
       { status: 500 },
     );
   }

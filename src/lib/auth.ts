@@ -43,7 +43,9 @@ export const authOptions: NextAuthOptions = {
   },
   events: {
     async signIn(message) {
-      console.log("[NextAuth signIn]", message);
+      if (process.env.NODE_ENV !== "production") {
+        console.log("[NextAuth signIn]", message);
+      }
     },
   },
 };

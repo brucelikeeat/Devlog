@@ -25,9 +25,9 @@ const mainNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Timeline", href: "/timeline", icon: GitBranch },
   { label: "Generate", href: "/generate", icon: Sparkles },
-  { label: "Content", href: "/content", icon: FileText, disabled: true, soon: true },
-  { label: "Calendar", href: "/calendar", icon: CalendarDays, disabled: true, soon: true },
-  { label: "Analytics", href: "/analytics", icon: BarChart3, disabled: true, soon: true },
+  { label: "Content", href: "#", icon: FileText, disabled: true, soon: true },
+  { label: "Calendar", href: "#", icon: CalendarDays, disabled: true, soon: true },
+  { label: "Analytics", href: "#", icon: BarChart3, disabled: true, soon: true },
 ];
 
 const bottomNavItems: NavItem[] = [
