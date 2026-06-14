@@ -1,6 +1,5 @@
 import Link from "next/link";
 import PlatformMarquee from "@/components/landing/PlatformMarquee";
-import GitGraphBackground from "@/components/landing/GitGraphBackground";
 import DevlogLogo from "@/components/brand/DevlogLogo";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import PricingSection from "@/components/landing/PricingSection";
@@ -12,7 +11,6 @@ export default function LandingPage() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0D0D12] text-zinc-100">
       <ScrollRevealInit />
-      <GitGraphBackground />
 
       {/* Navbar */}
       <nav className="fixed inset-x-0 top-0 z-50 h-14 border-b border-zinc-800/50 bg-[#0D0D12]/85 backdrop-blur-md">
