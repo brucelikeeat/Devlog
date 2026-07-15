@@ -1,22 +1,62 @@
-import type { GitHubRepo, GitHubCommit, GitHubPullRequest, GitHubRelease } from "./types";
+import type {
+  GitHubRepo,
+  GitHubCommit,
+  GitHubPullRequest,
+  GitHubRelease,
+} from "./types";
 
 const GITHUB_API_BASE = "https://api.github.com";
 
-function authHeaders(token: string) {
+function authHeaders(token: string): HeadersInit {
   return {
     Authorization: `Bearer ${token}`,
     Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    // GitHub rejects requests with no User-Agent.
+    "User-Agent": "Devlog-App",
   };
+}
+
+async function githubFetch<T>(
+  token: string,
+  path: string,
+  label: string,
+): Promise<T> {
+  if (!token) {
+    throw new Error(`${label}: GitHub access token is missing.`);
+  }
+
+  const res = await fetch(`${GITHUB_API_BASE}${path}`, {
+    headers: authHeaders(token),
+    // Next.js caches fetch() by default — never cache authenticated GitHub calls.
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    let detail = "";
+    try {
+      const body = (await res.json()) as { message?: string };
+      if (body?.message) detail = `: ${body.message}`;
+    } catch {
+      // ignore non-JSON error bodies
+    }
+
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(
+        `${label} failed (${res.status})${detail}. Reconnect GitHub in Settings.`,
+      );
+    }
+
+    throw new Error(`${label} failed (${res.status})${detail}`);
+  }
+
+  return res.json() as Promise<T>;
 }
 
 export async function fetchUserRepos(
   token: string,
   options: { sort?: string; perPage?: number } = {},
 ): Promise<GitHubRepo[]> {
-  if (!token) {
-    throw new Error("fetchUserRepos: GitHub access token is missing.");
-  }
-
   const { sort = "pushed", perPage = 50 } = options;
   const params = new URLSearchParams({
     sort,
@@ -24,15 +64,11 @@ export async function fetchUserRepos(
     direction: "desc",
   });
 
-  const res = await fetch(`${GITHUB_API_BASE}/user/repos?${params}`, {
-    headers: authHeaders(token),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch repos: ${res.status}`);
-  }
-
-  return res.json();
+  return githubFetch<GitHubRepo[]>(
+    token,
+    `/user/repos?${params}`,
+    "Failed to fetch repos",
+  );
 }
 
 export async function fetchRepoCommits(
@@ -41,24 +77,22 @@ export async function fetchRepoCommits(
   repo: string,
   options: { perPage?: number; sha?: string } = {},
 ): Promise<GitHubCommit[]> {
-  if (!token) {
-    throw new Error("fetchRepoCommits: GitHub access token is missing.");
-  }
-
-  const { perPage = 20, sha } = options;
+  const { perPage = 30, sha } = options;
   const params = new URLSearchParams({ per_page: String(perPage) });
   if (sha) params.set("sha", sha);
 
-  const res = await fetch(
-    `${GITHUB_API_BASE}/repos/${owner}/${repo}/commits?${params}`,
-    { headers: authHeaders(token) },
-  );
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch commits: ${res.status}`);
+  try {
+    return await githubFetch<GitHubCommit[]>(
+      token,
+      `/repos/${owner}/${repo}/commits?${params}`,
+      "Failed to fetch commits",
+    );
+  } catch (err) {
+    // GitHub returns 409 when the repository has no commits yet.
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes("(409)")) return [];
+    throw err;
   }
-
-  return res.json();
 }
 
 export async function fetchRepoPullRequests(
@@ -67,11 +101,7 @@ export async function fetchRepoPullRequests(
   repo: string,
   options: { perPage?: number } = {},
 ): Promise<GitHubPullRequest[]> {
-  if (!token) {
-    throw new Error("fetchRepoPullRequests: GitHub access token is missing.");
-  }
-
-  const { perPage = 20 } = options;
+  const { perPage = 30 } = options;
   const params = new URLSearchParams({
     state: "all",
     sort: "updated",
@@ -79,16 +109,11 @@ export async function fetchRepoPullRequests(
     per_page: String(perPage),
   });
 
-  const res = await fetch(
-    `${GITHUB_API_BASE}/repos/${owner}/${repo}/pulls?${params}`,
-    { headers: authHeaders(token) },
+  return githubFetch<GitHubPullRequest[]>(
+    token,
+    `/repos/${owner}/${repo}/pulls?${params}`,
+    "Failed to fetch pull requests",
   );
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch pull requests: ${res.status}`);
-  }
-
-  return res.json();
 }
 
 export async function fetchRepoReleases(
@@ -97,23 +122,14 @@ export async function fetchRepoReleases(
   repo: string,
   options: { perPage?: number } = {},
 ): Promise<GitHubRelease[]> {
-  if (!token) {
-    throw new Error("fetchRepoReleases: GitHub access token is missing.");
-  }
-
-  const { perPage = 10 } = options;
+  const { perPage = 20 } = options;
   const params = new URLSearchParams({
     per_page: String(perPage),
   });
 
-  const res = await fetch(
-    `${GITHUB_API_BASE}/repos/${owner}/${repo}/releases?${params}`,
-    { headers: authHeaders(token) },
+  return githubFetch<GitHubRelease[]>(
+    token,
+    `/repos/${owner}/${repo}/releases?${params}`,
+    "Failed to fetch releases",
   );
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch releases: ${res.status}`);
-  }
-
-  return res.json();
 }

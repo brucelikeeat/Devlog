@@ -75,7 +75,9 @@ export default async function SettingsPage() {
             title="GitHub Integration"
             description="Connected repositories and activity tracking"
           >
-            <GitHubSettingsSection initialStatus={githubStatus} />
+            <div id="github">
+              <GitHubSettingsSection initialStatus={githubStatus} />
+            </div>
           </SettingsSection>
 
           <SettingsSection
