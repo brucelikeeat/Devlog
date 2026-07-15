@@ -31,6 +31,7 @@ export function GitHubSettingsSection({
   const [loadingRepos, setLoadingRepos] = useState(false);
   const [repoError, setRepoError] = useState<string | null>(null);
   const [selectingRepo, setSelectingRepo] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
 
   const fetchRepos = useCallback(async () => {
     setLoadingRepos(true);
@@ -93,11 +94,26 @@ export function GitHubSettingsSection({
         </p>
         <button
           type="button"
-          onClick={() => signIn("github", { callbackUrl: "/settings" })}
-          className="inline-flex items-center gap-2 rounded-md bg-zinc-800 px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-zinc-700"
+          disabled={reconnecting}
+          onClick={() => {
+            setReconnecting(true);
+            signIn("github", { callbackUrl: "/settings" }).catch(() =>
+              setReconnecting(false),
+            );
+          }}
+          className="inline-flex items-center gap-2 rounded-md bg-zinc-800 px-4 py-2 text-sm text-zinc-200 transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          <Github className="h-3.5 w-3.5" />
-          Reconnect GitHub
+          {reconnecting ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Redirecting…
+            </>
+          ) : (
+            <>
+              <Github className="h-3.5 w-3.5" />
+              Reconnect GitHub
+            </>
+          )}
         </button>
       </div>
     );

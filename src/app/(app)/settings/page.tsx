@@ -167,12 +167,12 @@ export default async function SettingsPage() {
             </div>
 
             <div className="mt-3 rounded-lg border border-violet-500/20 bg-violet-500/5 p-4">
-              <p className="mb-1 text-sm font-medium text-violet-300">Devlog Pro</p>
+              <p className="mb-1 text-sm font-medium text-violet-300">Upgrade Devlog</p>
               <ul className="mb-3 space-y-1 text-xs text-zinc-400">
-                <li>Unlimited generation</li>
-                <li>Scheduling + content calendar</li>
-                <li>Tone presets + platform templates</li>
-                <li>Multi-platform publishing</li>
+                <li>Monthly — $4.99/mo, cancel anytime</li>
+                <li>Lifetime — $79.99 once, all future updates</li>
+                <li>Unlimited generation + all platforms</li>
+                <li>Priority generation speed</li>
               </ul>
               <button className="rounded-md bg-violet-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-violet-400">
                 Upgrade — coming soon

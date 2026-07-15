@@ -24,13 +24,31 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session, user }) {
-      const row = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { selectedGithubRepo: true },
-      });
       if (session.user) {
         session.user.id = user.id;
-        session.user.selectedGithubRepo = row?.selectedGithubRepo ?? null;
+
+        // With the database session strategy, `user` is the full adapter
+        // record, so `selectedGithubRepo` is already present — no extra query
+        // needed on every request. Fall back to a lookup only if it's absent,
+        // and never let a transient DB error tear down the whole session.
+        const repoFromUser = (
+          user as { selectedGithubRepo?: string | null }
+        ).selectedGithubRepo;
+
+        if (typeof repoFromUser !== "undefined") {
+          session.user.selectedGithubRepo = repoFromUser ?? null;
+        } else {
+          try {
+            const row = await prisma.user.findUnique({
+              where: { id: user.id },
+              select: { selectedGithubRepo: true },
+            });
+            session.user.selectedGithubRepo = row?.selectedGithubRepo ?? null;
+          } catch (err) {
+            console.error("[auth] failed to load selectedGithubRepo", err);
+            session.user.selectedGithubRepo = null;
+          }
+        }
       }
       return session;
     },
