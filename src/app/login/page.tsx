@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import DevlogLogo from "@/components/brand/DevlogLogo";
 import { LoginWithGithub } from "./LoginWithGithub";
 
 export const metadata = {
@@ -29,8 +30,8 @@ export default async function LoginPage({
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-6">
       <div className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900/40 p-8">
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-violet-500">
-            <span className="font-mono text-sm font-bold text-white">DL</span>
+          <div className="mb-4 flex justify-center">
+            <DevlogLogo width={150} color="#a78bfa" />
           </div>
           <h1 className="text-lg font-semibold text-zinc-100">Sign in to Devlog</h1>
           <p className="mt-1 text-sm text-zinc-500">
