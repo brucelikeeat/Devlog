@@ -73,8 +73,9 @@ export async function fetchRepoPullRequests(
 
   const { perPage = 20 } = options;
   const params = new URLSearchParams({
-    state: "closed",
+    state: "all",
     sort: "updated",
+    direction: "desc",
     per_page: String(perPage),
   });
 
