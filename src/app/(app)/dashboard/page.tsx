@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Dashboard",
 };
@@ -77,6 +79,8 @@ export default async function DashboardPage() {
   const entries = result.ok ? result.entries : [];
   const noToken = !result.ok && result.reason === "no_token";
   const fetchError = !result.ok && result.reason === "fetch_error";
+  const fetchErrorMessage =
+    !result.ok && result.reason === "fetch_error" ? result.message : null;
 
   const now = Date.now();
   const commitsThisWeek = entries.filter(
@@ -157,12 +161,26 @@ export default async function DashboardPage() {
         )}
 
         {fetchError && (
-          <div className="flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/5 px-4 py-3">
-            <RefreshCw className="h-4 w-4 flex-shrink-0 text-red-400" />
-            <p className="text-sm text-zinc-300">
-              Could not load activity from GitHub. Check your connection in
-              Settings and try again.
-            </p>
+          <div className="flex flex-col gap-2 rounded-lg border border-red-500/25 bg-red-500/5 px-4 py-3 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-1 items-start gap-2">
+              <RefreshCw className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-400" />
+              <div className="min-w-0">
+                <p className="text-sm text-zinc-300">
+                  Could not load activity from GitHub.
+                </p>
+                {fetchErrorMessage && (
+                  <p className="mt-0.5 truncate font-mono text-[11px] text-red-300/80">
+                    {fetchErrorMessage}
+                  </p>
+                )}
+              </div>
+            </div>
+            <Link
+              href="/settings"
+              className="flex-shrink-0 text-xs text-red-300 transition-colors hover:text-red-200"
+            >
+              Open Settings →
+            </Link>
           </div>
         )}
 
@@ -298,7 +316,7 @@ export default async function DashboardPage() {
                     {repoName}
                   </p>
                   <Link
-                    href="/settings"
+                    href="/settings#github"
                     className="inline-flex items-center gap-1.5 text-xs text-violet-400 transition-colors hover:text-violet-300"
                   >
                     Change repository

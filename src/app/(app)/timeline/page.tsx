@@ -5,6 +5,8 @@ import ConstellationTimeline from "@/components/timeline/ConstellationTimeline";
 import { authOptions } from "@/lib/auth";
 import { fetchTimelineEntries } from "@/server/timeline/fetchTimelineEntries";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Timeline",
 };
@@ -32,6 +34,9 @@ export default async function TimelinePage() {
 
   const entries = result.ok ? result.entries : [];
   const fetchError = !result.ok && result.reason === "fetch_error";
+  const fetchErrorMessage =
+    !result.ok && result.reason === "fetch_error" ? result.message : null;
+  const noToken = !result.ok && result.reason === "no_token";
   const repoName = session.user.selectedGithubRepo ?? null;
 
   return (
@@ -54,11 +59,24 @@ export default async function TimelinePage() {
           </div>
         )}
 
-        {fetchError ? (
+        {fetchError || noToken ? (
           <div className="mt-24 text-center">
-            <p className="text-sm text-zinc-500">
-              Could not load events. Check your GitHub connection in Settings.
+            <p className="text-sm text-zinc-400">
+              {noToken
+                ? "No GitHub token on file. Reconnect GitHub in Settings."
+                : "Could not load events from GitHub."}
             </p>
+            {fetchErrorMessage && (
+              <p className="mx-auto mt-2 max-w-lg font-mono text-[11px] text-red-300/80">
+                {fetchErrorMessage}
+              </p>
+            )}
+            <a
+              href="/settings"
+              className="mt-4 inline-block text-xs text-violet-400 hover:text-violet-300"
+            >
+              Open Settings →
+            </a>
           </div>
         ) : (
           <ConstellationTimeline entries={entries} />

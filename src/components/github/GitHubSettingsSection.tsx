@@ -62,14 +62,24 @@ export function GitHubSettingsSection({
   async function handleSelectRepo(repoFullName: string) {
     setSelectingRepo(true);
     try {
-      await fetch("/api/github/select-repo", {
+      const res = await fetch("/api/github/select-repo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ repo: repoFullName }),
       });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(
+          typeof body.error === "string" ? body.error : "Failed to select repository",
+        );
+      }
       setStatus((prev) => ({ ...prev, selectedRepo: repoFullName }));
       await updateSession();
       router.refresh();
+      // Take the user to the timeline so they immediately see activity load.
+      router.push("/timeline");
+    } catch (err) {
+      setRepoError(err instanceof Error ? err.message : "Failed to select repository");
     } finally {
       setSelectingRepo(false);
     }

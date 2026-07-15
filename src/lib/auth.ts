@@ -60,9 +60,38 @@ export const authOptions: NextAuthOptions = {
     },
   },
   events: {
-    async signIn(message) {
+    async signIn({ user, account }) {
+      // NextAuth's Prisma adapter does not always refresh OAuth tokens on
+      // subsequent sign-ins. Persist the latest GitHub access token so activity
+      // fetches keep working after reconnects.
+      if (account?.provider === "github" && account.access_token && user?.id) {
+        try {
+          await prisma.account.updateMany({
+            where: {
+              userId: user.id,
+              provider: "github",
+              providerAccountId: account.providerAccountId,
+            },
+            data: {
+              access_token: account.access_token,
+              refresh_token: account.refresh_token ?? undefined,
+              expires_at: account.expires_at ?? undefined,
+              token_type: account.token_type ?? undefined,
+              scope: account.scope ?? undefined,
+              id_token: account.id_token ?? undefined,
+            },
+          });
+        } catch (err) {
+          console.error("[auth] failed to refresh GitHub token on sign-in", err);
+        }
+      }
+
       if (process.env.NODE_ENV !== "production") {
-        console.log("[NextAuth signIn]", message);
+        console.log("[NextAuth signIn]", {
+          userId: user?.id,
+          provider: account?.provider,
+          hasAccessToken: !!account?.access_token,
+        });
       }
     },
   },
