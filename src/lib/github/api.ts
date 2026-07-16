@@ -3,6 +3,7 @@ import type {
   GitHubCommit,
   GitHubPullRequest,
   GitHubRelease,
+  GitHubUser,
 } from "./types";
 
 const GITHUB_API_BASE = "https://api.github.com";
@@ -12,7 +13,6 @@ function authHeaders(token: string): HeadersInit {
     Authorization: `Bearer ${token}`,
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
-    // GitHub rejects requests with no User-Agent.
     "User-Agent": "Devlog-App",
   };
 }
@@ -28,7 +28,6 @@ async function githubFetch<T>(
 
   const res = await fetch(`${GITHUB_API_BASE}${path}`, {
     headers: authHeaders(token),
-    // Next.js caches fetch() by default — never cache authenticated GitHub calls.
     cache: "no-store",
   });
 
@@ -53,22 +52,40 @@ async function githubFetch<T>(
   return res.json() as Promise<T>;
 }
 
+export async function fetchAuthenticatedUser(
+  token: string,
+): Promise<GitHubUser> {
+  return githubFetch<GitHubUser>(token, "/user", "Failed to fetch GitHub user");
+}
+
 export async function fetchUserRepos(
   token: string,
-  options: { sort?: string; perPage?: number } = {},
+  options: { sort?: string; perPage?: number; maxPages?: number } = {},
 ): Promise<GitHubRepo[]> {
-  const { sort = "pushed", perPage = 50 } = options;
-  const params = new URLSearchParams({
-    sort,
-    per_page: String(perPage),
-    direction: "desc",
-  });
+  const { sort = "pushed", perPage = 100, maxPages = 3 } = options;
+  const all: GitHubRepo[] = [];
 
-  return githubFetch<GitHubRepo[]>(
-    token,
-    `/user/repos?${params}`,
-    "Failed to fetch repos",
-  );
+  for (let page = 1; page <= maxPages; page++) {
+    const params = new URLSearchParams({
+      sort,
+      per_page: String(perPage),
+      page: String(page),
+      direction: "desc",
+      // Include owned, collaborator, and org membership repos.
+      affiliation: "owner,collaborator,organization_member",
+    });
+
+    const batch = await githubFetch<GitHubRepo[]>(
+      token,
+      `/user/repos?${params}`,
+      "Failed to fetch repos",
+    );
+
+    all.push(...batch);
+    if (batch.length < perPage) break;
+  }
+
+  return all;
 }
 
 export async function fetchRepoCommits(
@@ -88,7 +105,6 @@ export async function fetchRepoCommits(
       "Failed to fetch commits",
     );
   } catch (err) {
-    // GitHub returns 409 when the repository has no commits yet.
     const message = err instanceof Error ? err.message : String(err);
     if (message.includes("(409)")) return [];
     throw err;

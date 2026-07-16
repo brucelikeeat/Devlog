@@ -3,6 +3,10 @@ import { redirect } from "next/navigation";
 import { Topbar } from "@/components/layout/Topbar";
 import { GitHubSettingsSection } from "@/components/github";
 import {
+  PrivacyControls,
+  NotificationToggles,
+} from "@/components/settings/InteractiveSettings";
+import {
   Github,
   Bell,
   Lock,
@@ -13,6 +17,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { buildGithubConnectionStatus } from "@/server/github/buildGithubConnectionStatus";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Settings",
@@ -85,36 +91,7 @@ export default async function SettingsPage() {
             title="Privacy Controls"
             description="Control how much detail appears in generated content"
           >
-            <div className="space-y-2">
-              {privacyLevels.map((level) => (
-                <label
-                  key={level.name}
-                  className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3.5 transition-colors ${
-                    level.selected
-                      ? "border-violet-500/40 bg-violet-500/5"
-                      : "border-zinc-800 hover:border-zinc-700"
-                  }`}
-                >
-                  <div
-                    className={`mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
-                      level.selected
-                        ? "border-violet-500 bg-violet-500"
-                        : "border-zinc-600"
-                    }`}
-                  >
-                    {level.selected && (
-                      <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-zinc-200">{level.name}</p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">
-                      {level.description}
-                    </p>
-                  </div>
-                </label>
-              ))}
-            </div>
+            <PrivacyControls />
           </SettingsSection>
 
           <SettingsSection
@@ -122,27 +99,7 @@ export default async function SettingsPage() {
             title="Notifications"
             description="When and how Devlog alerts you"
           >
-            <div className="space-y-4">
-              {notifications.map((item) => (
-                <div key={item.label} className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-sm text-zinc-200">{item.label}</p>
-                    <p className="text-xs text-zinc-500">{item.description}</p>
-                  </div>
-                  <button
-                    className={`relative h-5 w-9 flex-shrink-0 rounded-full transition-colors ${
-                      item.enabled ? "bg-violet-500" : "bg-zinc-700"
-                    }`}
-                  >
-                    <div
-                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                        item.enabled ? "translate-x-4" : "translate-x-0.5"
-                      }`}
-                    />
-                  </button>
-                </div>
-              ))}
-            </div>
+            <NotificationToggles />
           </SettingsSection>
 
           <SettingsSection
@@ -211,42 +168,3 @@ function SettingsSection({
     </div>
   );
 }
-
-const privacyLevels = [
-  {
-    name: "High Privacy",
-    description:
-      "Commit messages and high-level summaries only. No code, file paths, or implementation details in generated content.",
-    selected: true,
-  },
-  {
-    name: "Medium Privacy",
-    description:
-      "Describes behavior and impact without exposing sensitive internals, algorithm details, or file paths.",
-    selected: false,
-  },
-  {
-    name: "Low Privacy",
-    description:
-      "Best for open-source. Allows specific feature mentions, links, and more technical detail in generated content.",
-    selected: false,
-  },
-];
-
-const notifications = [
-  {
-    label: "Post drafts ready",
-    description: "When Devlog generates a new post from your GitHub activity",
-    enabled: true,
-  },
-  {
-    label: "Weekly digest",
-    description: "A summary of your build activity every Monday",
-    enabled: false,
-  },
-  {
-    label: "Publishing confirmations",
-    description: "When a post is successfully published to a platform",
-    enabled: true,
-  },
-];
