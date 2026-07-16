@@ -1,6 +1,6 @@
 import type { Session } from "next-auth";
 import type { GitHubConnectionStatus } from "@/lib/github/types";
-import { prisma } from "@/lib/prisma";
+import { fetchAuthenticatedUser } from "@/lib/github/api";
 import { getGithubAccessTokenForUser } from "./getGithubAccessToken";
 
 export async function buildGithubConnectionStatus(
@@ -12,19 +12,28 @@ export async function buildGithubConnectionStatus(
   }
 
   const token = await getGithubAccessTokenForUser(userId);
-  const account = await prisma.account.findFirst({
-    where: { userId, provider: "github" },
-    select: { providerAccountId: true },
-  });
+  if (!token) {
+    return {
+      connected: false,
+      user: null,
+      selectedRepo: session.user?.selectedGithubRepo ?? null,
+    };
+  }
+
+  // Prefer the live GitHub login over providerAccountId (which is a numeric id).
+  let login = session.user?.name ?? "github-user";
+  let avatarUrl = session.user?.image ?? "";
+  try {
+    const ghUser = await fetchAuthenticatedUser(token);
+    login = ghUser.login;
+    avatarUrl = ghUser.avatar_url || avatarUrl;
+  } catch {
+    // Keep session fallbacks if the /user call fails.
+  }
 
   return {
-    connected: !!token,
-    user: account
-      ? {
-          login: account.providerAccountId,
-          avatarUrl: session.user?.image ?? "",
-        }
-      : null,
+    connected: true,
+    user: { login, avatarUrl },
     selectedRepo: session.user?.selectedGithubRepo ?? null,
   };
 }

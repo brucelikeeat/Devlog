@@ -12,22 +12,20 @@ import {
   CalendarDays,
   BarChart3,
   Settings,
-  ChevronDown,
-  Github,
   ArrowLeft,
-  CheckCircle2,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { NavItem } from "@/types/nav";
+import { SidebarRepoSwitcher } from "./SidebarRepoSwitcher";
 
 const mainNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Timeline", href: "/timeline", icon: GitBranch },
   { label: "Generate", href: "/generate", icon: Sparkles },
-  { label: "Content", href: "#", icon: FileText, disabled: true, soon: true },
-  { label: "Calendar", href: "#", icon: CalendarDays, disabled: true, soon: true },
-  { label: "Analytics", href: "#", icon: BarChart3, disabled: true, soon: true },
+  { label: "Content", href: "/content", icon: FileText, disabled: true, soon: true },
+  { label: "Calendar", href: "/calendar", icon: CalendarDays, disabled: true, soon: true },
+  { label: "Analytics", href: "/analytics", icon: BarChart3, disabled: true, soon: true },
 ];
 
 const bottomNavItems: NavItem[] = [
@@ -36,9 +34,7 @@ const bottomNavItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { data: session, status } = useSession();
-  const repoName = session?.user?.selectedGithubRepo ?? null;
-  const loading = status === "loading";
+  const { data: session } = useSession();
 
   const displayName =
     session?.user?.name ?? session?.user?.email ?? "Signed in";
@@ -59,36 +55,11 @@ export function Sidebar() {
             className="transition-opacity group-hover:opacity-80"
           />
         </Link>
-        <button type="button" className="ml-auto text-zinc-600 hover:text-zinc-400 transition-colors">
-          <ChevronDown className="h-3.5 w-3.5" />
-        </button>
       </div>
 
-      {/* Repo selector */}
+      {/* Repo switcher — click to open list of all GitHub repos */}
       <div className="px-3 pt-3">
-        {loading ? (
-          <div className="flex w-full items-center gap-2 rounded-md border border-zinc-800 px-2 py-1.5 text-xs text-zinc-600">
-            <span className="truncate">Loading…</span>
-          </div>
-        ) : repoName ? (
-          <Link
-            href="/settings"
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-emerald-400 hover:bg-zinc-800 transition-colors border border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/30"
-          >
-            <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="truncate font-mono">{repoName.split("/").pop()}</span>
-            <ChevronDown className="ml-auto h-3 w-3 flex-shrink-0" />
-          </Link>
-        ) : (
-          <Link
-            href="/settings"
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-violet-400 hover:bg-zinc-800 transition-colors border border-violet-500/20 bg-violet-500/5 hover:border-violet-500/30"
-          >
-            <Github className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="truncate">Select a repo</span>
-            <ChevronDown className="ml-auto h-3 w-3 flex-shrink-0" />
-          </Link>
-        )}
+        <SidebarRepoSwitcher />
       </div>
 
       {/* Section label */}
@@ -102,7 +73,7 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto px-2 pb-3">
         <div className="space-y-0.5">
           {mainNavItems.map((item) => (
-            <SidebarNavLink key={item.href} item={item} pathname={pathname} />
+            <SidebarNavLink key={item.label} item={item} pathname={pathname} />
           ))}
         </div>
       </nav>
@@ -110,7 +81,7 @@ export function Sidebar() {
       {/* Bottom */}
       <div className="border-t border-zinc-800 px-2 py-2 space-y-0.5">
         {bottomNavItems.map((item) => (
-          <SidebarNavLink key={item.href} item={item} pathname={pathname} />
+          <SidebarNavLink key={item.label} item={item} pathname={pathname} />
         ))}
 
         <Link
@@ -164,11 +135,15 @@ function SidebarNavLink({
   pathname: string;
 }) {
   const isActive =
-    pathname === item.href || pathname.startsWith(item.href + "/");
+    !item.disabled &&
+    (pathname === item.href || pathname.startsWith(item.href + "/"));
 
   if (item.disabled) {
     return (
-      <div className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-zinc-700 cursor-not-allowed select-none">
+      <div
+        title="Coming soon"
+        className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-zinc-700 cursor-not-allowed select-none"
+      >
         <item.icon className="h-4 w-4 flex-shrink-0 text-zinc-700" />
         <span className="flex-1">{item.label}</span>
         {item.soon && (
@@ -187,13 +162,13 @@ function SidebarNavLink({
         "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-all duration-150",
         isActive
           ? "bg-violet-500/10 text-violet-300 font-medium"
-          : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+          : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800",
       )}
     >
       <item.icon
         className={cn(
           "h-4 w-4 flex-shrink-0 transition-colors",
-          isActive ? "text-violet-400" : "text-zinc-600"
+          isActive ? "text-violet-400" : "text-zinc-600",
         )}
       />
       <span className="flex-1">{item.label}</span>

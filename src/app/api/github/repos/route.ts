@@ -19,7 +19,7 @@ export async function GET() {
   }
 
   try {
-    const repos = await fetchUserRepos(token, { perPage: 50 });
+    const repos = await fetchUserRepos(token, { perPage: 100, maxPages: 3 });
     return NextResponse.json(repos);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to fetch repos";

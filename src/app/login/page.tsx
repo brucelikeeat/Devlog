@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import DevlogLogo from "@/components/brand/DevlogLogo";
 import { LoginWithGithub } from "./LoginWithGithub";
+import { LoginSessionRedirect } from "./LoginSessionRedirect";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Sign in",
@@ -17,7 +20,9 @@ export default async function LoginPage({
   const session = await getServerSession(authOptions);
   const rawCb = searchParams.callbackUrl;
   const callbackUrl =
-    typeof rawCb === "string" && rawCb.startsWith("/") ? rawCb : "/dashboard";
+    typeof rawCb === "string" && rawCb.startsWith("/") && !rawCb.startsWith("//")
+      ? rawCb
+      : "/dashboard";
 
   if (session) {
     redirect(callbackUrl);
@@ -47,6 +52,7 @@ export default async function LoginPage({
           </div>
         )}
 
+        <LoginSessionRedirect callbackUrl={callbackUrl} />
         <LoginWithGithub callbackUrl={callbackUrl} />
 
         <p className="mt-6 text-center text-xs text-zinc-600">

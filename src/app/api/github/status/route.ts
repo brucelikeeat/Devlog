@@ -2,8 +2,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
 import type { GitHubConnectionStatus } from "@/lib/github/types";
-import { prisma } from "@/lib/prisma";
-import { getGithubAccessTokenForUser } from "@/server/github/getGithubAccessToken";
+import { buildGithubConnectionStatus } from "@/server/github/buildGithubConnectionStatus";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -16,22 +15,6 @@ export async function GET() {
     return NextResponse.json(status);
   }
 
-  const token = await getGithubAccessTokenForUser(session.user.id);
-  const account = await prisma.account.findFirst({
-    where: { userId: session.user.id, provider: "github" },
-    select: { providerAccountId: true },
-  });
-
-  const status: GitHubConnectionStatus = {
-    connected: !!token,
-    user: account
-      ? {
-          login: account.providerAccountId,
-          avatarUrl: session.user.image ?? "",
-        }
-      : null,
-    selectedRepo: session.user.selectedGithubRepo,
-  };
-
+  const status = await buildGithubConnectionStatus(session);
   return NextResponse.json(status);
 }
