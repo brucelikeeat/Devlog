@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import DevlogLogo from "@/components/brand/DevlogLogo";
+import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   GitBranch,
+  Sparkles,
   FileText,
   CalendarDays,
   BarChart3,
@@ -12,6 +15,8 @@ import {
   ChevronDown,
   Github,
   ArrowLeft,
+  CheckCircle2,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { NavItem } from "@/types/nav";
@@ -19,9 +24,10 @@ import type { NavItem } from "@/types/nav";
 const mainNavItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Timeline", href: "/timeline", icon: GitBranch },
-  { label: "Content", href: "/content", icon: FileText, disabled: true, soon: true },
-  { label: "Calendar", href: "/calendar", icon: CalendarDays, disabled: true, soon: true },
-  { label: "Analytics", href: "/analytics", icon: BarChart3, disabled: true, soon: true },
+  { label: "Generate", href: "/generate", icon: Sparkles },
+  { label: "Content", href: "#", icon: FileText, disabled: true, soon: true },
+  { label: "Calendar", href: "#", icon: CalendarDays, disabled: true, soon: true },
+  { label: "Analytics", href: "#", icon: BarChart3, disabled: true, soon: true },
 ];
 
 const bottomNavItems: NavItem[] = [
@@ -30,6 +36,13 @@ const bottomNavItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+  const repoName = session?.user?.selectedGithubRepo ?? null;
+  const loading = status === "loading";
+
+  const displayName =
+    session?.user?.name ?? session?.user?.email ?? "Signed in";
+  const initial = displayName.charAt(0).toUpperCase();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-zinc-800 bg-zinc-900">
@@ -40,25 +53,42 @@ export function Sidebar() {
           className="flex items-center gap-2.5 group"
           title="Back to home"
         >
-          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-violet-500 transition-colors group-hover:bg-violet-400">
-            <span className="font-mono text-[11px] font-bold text-white tracking-tight">DL</span>
-          </div>
-          <span className="font-semibold text-zinc-100 tracking-tight group-hover:text-violet-300 transition-colors">
-            Devlog
-          </span>
+          <DevlogLogo
+            width={120}
+            color="#6B35D9"
+            className="transition-opacity group-hover:opacity-80"
+          />
         </Link>
-        <button className="ml-auto text-zinc-600 hover:text-zinc-400 transition-colors">
+        <button type="button" className="ml-auto text-zinc-600 hover:text-zinc-400 transition-colors">
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
       </div>
 
       {/* Repo selector */}
       <div className="px-3 pt-3">
-        <button className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300 transition-colors border border-dashed border-zinc-800 hover:border-zinc-700">
-          <Github className="h-3.5 w-3.5 flex-shrink-0" />
-          <span className="truncate">No repo connected</span>
-          <ChevronDown className="ml-auto h-3 w-3 flex-shrink-0" />
-        </button>
+        {loading ? (
+          <div className="flex w-full items-center gap-2 rounded-md border border-zinc-800 px-2 py-1.5 text-xs text-zinc-600">
+            <span className="truncate">Loading…</span>
+          </div>
+        ) : repoName ? (
+          <Link
+            href="/settings"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-emerald-400 hover:bg-zinc-800 transition-colors border border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/30"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate font-mono">{repoName.split("/").pop()}</span>
+            <ChevronDown className="ml-auto h-3 w-3 flex-shrink-0" />
+          </Link>
+        ) : (
+          <Link
+            href="/settings"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-violet-400 hover:bg-zinc-800 transition-colors border border-violet-500/20 bg-violet-500/5 hover:border-violet-500/30"
+          >
+            <Github className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">Select a repo</span>
+            <ChevronDown className="ml-auto h-3 w-3 flex-shrink-0" />
+          </Link>
+        )}
       </div>
 
       {/* Section label */}
@@ -83,7 +113,6 @@ export function Sidebar() {
           <SidebarNavLink key={item.href} item={item} pathname={pathname} />
         ))}
 
-        {/* Back to landing */}
         <Link
           href="/"
           className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-zinc-600 hover:text-zinc-400 hover:bg-zinc-800 transition-all duration-150 group"
@@ -92,17 +121,36 @@ export function Sidebar() {
           <span>Back to site</span>
         </Link>
 
-        {/* User profile */}
-        <button className="mt-1 flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm hover:bg-zinc-800 transition-colors group">
-          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-xs font-semibold text-violet-300">
-            BL
+        <div className="mt-1 space-y-1 rounded-md px-2 py-2 hover:bg-zinc-800/60 transition-colors">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-500/20 text-xs font-semibold text-violet-300">
+              {session?.user?.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={session.user.image}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                initial
+              )}
+            </div>
+            <div className="min-w-0 flex-1 text-left">
+              <div className="truncate text-xs font-medium text-zinc-300">
+                {displayName}
+              </div>
+              <div className="truncate text-[10px] text-zinc-600">GitHub account</div>
+            </div>
           </div>
-          <div className="flex-1 text-left min-w-0">
-            <div className="text-xs font-medium text-zinc-300 truncate">bruceliu</div>
-            <div className="text-[10px] text-zinc-600 truncate">Free plan</div>
-          </div>
-          <ChevronDown className="h-3 w-3 text-zinc-600 group-hover:text-zinc-400 transition-colors flex-shrink-0" />
-        </button>
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="flex w-full items-center gap-1.5 rounded px-1 py-1 text-[11px] text-zinc-500 transition-colors hover:text-zinc-300"
+          >
+            <LogOut className="h-3 w-3" />
+            Sign out
+          </button>
+        </div>
       </div>
     </aside>
   );

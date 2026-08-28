@@ -184,15 +184,19 @@ Help developers grow audiences, acquire early users, build communities, and laun
 
 ## Tech Stack
 
+Devlog is built on a modern, industry-standard web stack that’s common across SaaS dashboards and developer tools.
+
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| **Frontend** | Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Geist font | Dashboard, timeline, content editor, analytics, calendar UI |
-| **Styling** | Tailwind CSS, `clsx`, `tailwind-merge`, `class-variance-authority`, `lucide-react` | Dark-mode design system, variant-based components, icon library |
-| **Backend** | Next.js Route Handlers, TypeScript | GitHub event processing, AI generation, API routing, platform integrations |
-| **AI** | OpenAI API, Anthropic API, local model support *(planned)* | Commit summarization, post generation, tone adaptation, thread formatting |
-| **Database** | PostgreSQL + Prisma | Users, repositories, generated posts, platform tokens, analytics |
-| **Queue** | Redis, BullMQ | AI job processing, scheduled posts, event pipelines |
-| **Infra** | Vercel, Railway / Fly.io, Supabase, Cloudflare | Frontend hosting, backend hosting, auth + database, edge security |
+| **Frontend** | Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Geist font, Framer Motion | Modern, responsive dashboard UI, timeline, content editor, analytics, and calendar interactions |
+| **Styling** | Tailwind CSS, `clsx`, `tailwind-merge`, `class-variance-authority`, `lucide-react` | Dark-mode design system, variant-based components, utility composition, and icons |
+| **Backend** | Next.js Route Handlers, TypeScript | GitHub webhook handling, event processing, AI orchestration, API routing, and platform integrations |
+| **AI** | OpenAI API, Anthropic API, local model support *(planned)* | Commit summarization, outcome-focused narrative, multi-platform post generation, and tone adaptation |
+| **Database** | PostgreSQL + Prisma | Users, repositories, events, generated posts, privacy settings, and analytics |
+| **Queue** | Redis, BullMQ *(or equivalent)* | Background AI job processing, scheduled posts, and event pipelines |
+| **Infra** | Vercel, Railway / Fly.io, Supabase/Neon, Cloudflare | Frontend hosting, backend services, managed Postgres, auth, and edge security |
+
+Python and FastAPI are also strong candidates for AI-heavy backend components in the future, but the initial product surface is optimized around the React + TypeScript + Next.js ecosystem that most modern dev tools use.
 
 ---
 
@@ -201,8 +205,8 @@ Help developers grow audiences, acquire early users, build communities, and laun
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL
-- Redis
+- A **GitHub OAuth App** (for “Sign in with GitHub”)
+- **SQLite** is used by default for local development (no Postgres required to start). Redis/Postgres remain optional for future features.
 
 ### Setup
 
@@ -215,20 +219,27 @@ cd devlog
 npm install
 
 # Configure environment variables
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Add your keys to `.env`:
+Add your keys to `.env.local` at minimum:
 
 ```env
-OPENAI_API_KEY=
+DATABASE_URL="file:./prisma/dev.db"
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-DATABASE_URL=
-REDIS_URL=
+NEXTAUTH_SECRET=   # e.g. openssl rand -base64 32
+NEXTAUTH_URL=http://localhost:3000
 ```
 
+In your **GitHub OAuth App**, set **Authorization callback URL** to:
+
+`http://localhost:3000/api/auth/callback/github`
+
 ```bash
+# Create / update the local database
+npx prisma migrate dev
+
 # Start development server
 npm run dev
 ```
@@ -284,9 +295,47 @@ This keeps `main` clean for deployments while preserving a clear history of feat
 
 ---
 
+## Project Structure
+
+Devlog currently uses a **single-app structure** optimized for fast iteration, with a clean path to a future monorepo split if the backend grows significantly.
+
+```text
+docs/                 architecture, API contracts, decision records, agent coordination
+src/app/              Next.js routes and route handlers
+src/components/       reusable UI components
+src/features/         feature-level domains (github, timeline, privacy, post generation, etc.)
+src/lib/              shared helpers and infrastructure clients
+src/server/           server-only services, repositories, jobs, and schemas
+src/styles/           global styles
+src/types/            shared application types
+prisma/               database schema and migrations
+scripts/              local automation scripts
+tests/                unit and integration tests
+.github/workflows/    CI and automation workflows
+```
+
+### Agent coordination rule
+
+Every `feature/*` branch must update `docs/agent-worklog.md` in its first meaningful commit so each implementation chat can quickly understand:
+
+- what branch is active,
+- what area is being changed,
+- what files are expected to be touched,
+- and whether the work depends on any API or data model changes.
+
+Supporting docs:
+
+- `docs/CHANGELOG.md` — dated milestones (start here for “what changed when”)
+- `docs/architecture.md`
+- `docs/api-contracts.md`
+- `docs/agent-worklog.md`
+- `docs/decisions/`
+
+---
+
 ## Current Build Status
 
-> Last updated: Mar 19, 2026 · `v0.1.0` · branch `feature/dev-timeline-ui`
+> Last updated: Mar 19, 2026 · `v0.1.0` · merged into `main`
 
 | Area | Status | Notes |
 |------|--------|-------|
@@ -295,7 +344,7 @@ This keeps `main` clean for deployments while preserving a clear history of feat
 | Dashboard | ✅ Prototype | Static placeholder data |
 | Dev Timeline UI | ✅ Done | Fully componentized, fake data, live search + type filter |
 | Settings page | ✅ Prototype | UI shell only |
-| GitHub integration | 🔲 Planned | OAuth, webhook, event normalization |
+| GitHub integration | 🟡 In Progress | OAuth connect, repo picker, commit fetch (no webhooks yet) |
 | AI post generator | 🔲 Planned | LLM prompt pipeline |
 | Content editor | 🔲 Planned | Rich text, tone adjustment |
 | Multi-platform publishing | 🔲 Planned | X, LinkedIn, Reddit, Dev.to |
@@ -327,6 +376,36 @@ Analytics dashboard, content strategy AI, viral post prediction, audience discov
 
 ### Phase 3 — Full Distribution Platform
 Community features, developer leaderboard, automatic devlogs, visual content generation (screenshots, mockups, diagrams).
+
+---
+
+## Release Milestones
+
+Devlog will use simple semantic versioning to mark meaningful product stages.
+
+### v0.1.0 – Internal MVP
+
+- GitHub OAuth + repo selection for a single user.
+- Basic event capture from commits and/or pull requests.
+- Simple internal-only dev timeline UI with fake or minimal AI summaries.
+- No external users yet, used only by the maker to test core workflows.
+
+### v0.2.0 – Early Access (Friends & Testers)
+
+- Reliable GitHub event ingestion for selected repos.
+- AI-generated summaries for meaningful events (commit/PR → outcome-focused text).
+- Editable dev timeline entries and a first version of privacy levels (e.g., high vs medium).
+- Ability to generate draft posts for at least reddit, maybe X and LinkedIn.
+- Onboarding that a small group of external testers can complete without hand-holding.
+
+### v1.0.0 – Public Launch
+
+- Stable GitHub integration with clear error handling and status.
+- Polished dev timeline and content calendar suitable for daily use.
+- Mature privacy controls, documented and easy to understand.
+- Multi-platform post generation with tone presets (X, LinkedIn, Reddit at minimum).
+- Basic analytics (consistency and top-performing posts) and a simple paid plan.
+- Public landing page, documentation, and GitHub release tagged `v1.0.0`.
 
 ---
 
@@ -365,6 +444,7 @@ Devlog will ship with a simple, pragmatic pricing model designed to balance adop
 | **Automatic Devlogs** | AI-generated weekly progress reports |
 | **Visual Content Generation** | Feature screenshots, product mockups, diagrams |
 | **Audience Discovery** | Identify potential users by interest, engagement, and topic relevance |
+| **Devlog → Docs Integration** | Export timeline entries into long-form documentation (e.g. wiki-style pages) for design notes, changelogs, and internal knowledge bases |
 
 ---
 

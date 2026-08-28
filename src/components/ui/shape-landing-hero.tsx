@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Circle, Github, ArrowRight, GitCommit, CheckCircle2, Zap } from "lucide-react";
+import { Github, ArrowRight } from "lucide-react";
+import AnimatedTerminal from "@/components/landing/AnimatedTerminal";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 
@@ -92,6 +93,19 @@ export function LandingHero() {
       {/* Radial glow */}
       <div className="absolute inset-0 bg-hero-glow" />
 
+      {/* Multi-point gradient — drifts very slowly for life */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 80% 50% at 20% 20%, rgba(124,58,237,0.18) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 40% at 80% 80%, rgba(59,130,246,0.10) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 60% at 50% 100%, rgba(139,92,246,0.08) 0%, transparent 50%)
+          `,
+          animation: "shimmer-drift 18s ease-in-out infinite",
+        }}
+      />
+
       {/* Floating shapes — Devlog palette: violet, indigo, cyan */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <ElegantShape
@@ -139,11 +153,35 @@ export function LandingHero() {
       {/* Hero content */}
       <div className="relative z-10 mx-auto max-w-4xl text-center">
         {/* Eyebrow badge */}
-        <FadeUp delay={0.3} className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1">
-          <Circle className="h-2 w-2 fill-violet-500/80 text-violet-500/80" />
-          <span className="text-xs tracking-wide text-white/50">
-            AI-powered developer growth engine
-          </span>
+        <FadeUp delay={0.3} className="mb-8">
+          <div
+            style={{
+              background: "linear-gradient(135deg, rgba(124,58,237,0.2), rgba(59,130,246,0.1))",
+              border: "1px solid rgba(167,139,250,0.35)",
+              borderRadius: 999,
+              padding: "6px 16px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            }}
+          >
+            <div
+              className="animate-pulse"
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "#a78bfa",
+                boxShadow: "0 0 8px rgba(167,139,250,0.8)",
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 13 }}>
+              AI-powered developer growth engine
+            </span>
+          </div>
         </FadeUp>
 
         {/* Headline */}
@@ -153,7 +191,14 @@ export function LandingHero() {
               Turn your commits
             </span>
             <br />
-            <span className="bg-gradient-to-r from-violet-300 via-white/90 to-indigo-300 bg-clip-text text-transparent">
+            <span
+              style={{
+                background: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 40%, #6d28d9 70%, #c4b5fd 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
               into content.
             </span>
           </h1>
@@ -171,8 +216,26 @@ export function LandingHero() {
         {/* CTAs */}
         <FadeUp delay={0.84} className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
-            href="/dashboard"
-            className="flex items-center gap-2 rounded-lg bg-violet-500 px-5 py-2.5 font-medium text-white transition-colors hover:bg-violet-400"
+            href="/login"
+            className="flex items-center gap-2 font-semibold text-white"
+            style={{
+              background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%)",
+              boxShadow: "0 4px 24px rgba(124,58,237,0.45), 0 1px 0 rgba(255,255,255,0.1) inset",
+              borderRadius: 12,
+              padding: "12px 24px",
+              fontSize: 15,
+              transition: "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow =
+                "0 6px 32px rgba(124,58,237,0.65), 0 1px 0 rgba(255,255,255,0.1) inset";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow =
+                "0 4px 24px rgba(124,58,237,0.45), 0 1px 0 rgba(255,255,255,0.1) inset";
+              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+            }}
           >
             <Github className="h-4 w-4" />
             Connect GitHub — it&apos;s free
@@ -188,56 +251,7 @@ export function LandingHero() {
 
         {/* Terminal mockup */}
         <FadeUp delay={1.02} className="mx-auto mt-16 max-w-2xl">
-          <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] shadow-2xl shadow-black/60 text-left backdrop-blur-sm">
-            {/* Window chrome */}
-            <div className="flex items-center gap-1.5 border-b border-white/[0.06] bg-white/[0.02] px-4 py-2.5">
-              <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
-              <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
-              <div className="h-2.5 w-2.5 rounded-full bg-white/10" />
-              <span className="ml-2 font-mono text-[11px] text-white/25">
-                devlog · activity feed
-              </span>
-            </div>
-
-            {/* Content */}
-            <div className="space-y-4 p-5 font-mono text-sm">
-              <div className="flex items-start gap-3">
-                <GitCommit className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400/80" />
-                <div>
-                  <div className="text-amber-400/80">
-                    commit detected
-                    <span className="ml-2 text-white/25">· startup-validator</span>
-                  </div>
-                  <div className="mt-0.5 text-white/40">
-                    &quot;Implemented startup scoring algorithm&quot;
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-400/80" />
-                <div>
-                  <span className="text-violet-400/80">AI analyzing</span>
-                  <span className="text-white/25"> · generating outcome-focused summary...</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-400/80" />
-                <div>
-                  <div className="text-emerald-400/80">
-                    post generated
-                    <span className="ml-2 text-white/25">· X (Twitter)</span>
-                  </div>
-                  <div className="mt-0.5 leading-relaxed text-white/60">
-                    &quot;Day 14 building my AI startup validator. Just shipped
-                    the scoring engine — it now evaluates ideas across market
-                    size, competition & founder fit...&quot;
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <AnimatedTerminal />
         </FadeUp>
       </div>
 

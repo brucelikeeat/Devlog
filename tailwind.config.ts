@@ -10,18 +10,31 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      colors: {
-        background: "rgb(9 9 11)",
-        foreground: "rgb(244 244 245)",
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
-      animation: {
-        "fade-in": "fade-in 240ms ease-out",
+      colors: {
+        accent: {
+          DEFAULT: "#8b5cf6",
+          hover: "#7c3aed",
+          muted: "rgba(139,92,246,0.12)",
+          foreground: "#ffffff",
+        },
       },
       keyframes: {
         "fade-in": {
-          "0%": { opacity: "0", transform: "translateY(6px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
+          from: { opacity: "0" },
+          to: { opacity: "1" },
         },
+        "slide-up": {
+          from: { transform: "translateY(10px)", opacity: "0" },
+          to: { transform: "translateY(0)", opacity: "1" },
+        },
+      },
+      animation: {
+        "fade-in": "fade-in 0.4s ease-out",
+        "slide-up": "slide-up 0.4s ease-out",
       },
     },
   },

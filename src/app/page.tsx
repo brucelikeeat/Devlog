@@ -1,29 +1,22 @@
 import Link from "next/link";
-import {
-  GitBranch,
-  Zap,
-  BarChart3,
-  ArrowRight,
-  Github,
-  CheckCircle2,
-  FileText,
-  CalendarDays,
-  Lock,
-  GitPullRequest,
-} from "lucide-react";
+import PlatformMarquee from "@/components/landing/PlatformMarquee";
+import DevlogLogo from "@/components/brand/DevlogLogo";
+import FeaturesSection from "@/components/landing/FeaturesSection";
+import PricingSection from "@/components/landing/PricingSection";
+import ScrollRevealInit from "@/components/landing/ScrollRevealInit";
+import { Github } from "lucide-react";
 import { LandingHero } from "@/components/ui/shape-landing-hero";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="relative min-h-screen overflow-hidden bg-[#0D0D12] text-zinc-100">
+      <ScrollRevealInit />
+
       {/* Navbar */}
-      <nav className="fixed inset-x-0 top-0 z-50 h-14 border-b border-zinc-800/50 bg-zinc-950/85 backdrop-blur-md">
+      <nav className="fixed inset-x-0 top-0 z-50 h-14 border-b border-zinc-800/50 bg-[#0D0D12]/85 backdrop-blur-md">
         <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-violet-500">
-              <span className="font-mono text-[11px] font-bold text-white">DL</span>
-            </div>
-            <span className="font-semibold tracking-tight text-zinc-100">Devlog</span>
+          <div className="flex items-center">
+            <DevlogLogo width={140} color="#6B35D9" />
           </div>
 
           <div className="hidden items-center gap-7 text-sm text-zinc-400 md:flex">
@@ -40,13 +33,13 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/dashboard"
+              href="/login"
               className="text-sm text-zinc-400 transition-colors hover:text-zinc-100"
             >
               Sign in
             </Link>
             <Link
-              href="/dashboard"
+              href="/login"
               className="flex items-center gap-1.5 rounded-md bg-violet-500 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-violet-400"
             >
               <Github className="h-3.5 w-3.5" />
@@ -57,57 +50,49 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero — animated with framer-motion shapes */}
-      <LandingHero />
+      <div className="relative z-10">
+        <LandingHero />
+      </div>
 
       {/* Features */}
-      <section id="features" className="px-6 py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-14 text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight">
-              Everything you need to build in public
-            </h2>
-            <p className="mx-auto max-w-xl text-zinc-400">
-              Devlog handles the full pipeline from GitHub activity to published
-              content — without exposing your core IP.
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="group rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 transition-colors hover:border-zinc-700 hover:bg-zinc-900/70"
-              >
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-800 transition-colors group-hover:bg-zinc-700/60">
-                  <feature.icon className="h-5 w-5 text-violet-400" />
-                </div>
-                <h3 className="mb-2 font-semibold text-zinc-100">{feature.title}</h3>
-                <p className="text-sm leading-relaxed text-zinc-400">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div id="features" className="relative z-10">
+        <FeaturesSection />
+      </div>
 
       {/* How it works */}
-      <section id="how-it-works" className="border-t border-zinc-800 px-6 py-24">
+      <section id="how-it-works" className="relative z-10 border-t border-zinc-800 px-6 py-24">
         <div className="mx-auto max-w-4xl">
           <div className="mb-14 text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight reveal reveal-up">
               Ship code. Devlog handles the rest.
             </h2>
-            <p className="text-zinc-400">
+            <p className="text-zinc-400 reveal reveal-up delay-1">
               A three-step pipeline from commit to content.
             </p>
           </div>
 
           <div className="grid gap-10 md:grid-cols-3 md:gap-6">
             {steps.map((step, i) => (
-              <div key={step.title} className="flex gap-4">
+              <div
+                key={step.title}
+                className={`flex gap-4 reveal ${
+                  i === 0
+                    ? "reveal-left delay-1"
+                    : i === 1
+                    ? "reveal-up delay-2"
+                    : "reveal-right delay-3"
+                }`}
+              >
                 <div className="flex flex-col items-center">
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-violet-500/30 bg-violet-500/10 font-mono text-sm font-bold text-violet-400">
+                  <div
+                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-mono text-sm font-bold border ${
+                      i === 0
+                        ? "border-violet-500/30 bg-violet-500/10 text-violet-400"
+                        : i === 1
+                        ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                        : "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    }`}
+                  >
                     {i + 1}
                   </div>
                   {i < steps.length - 1 && (
@@ -127,63 +112,20 @@ export default function LandingPage() {
       </section>
 
       {/* Platforms */}
-      <section className="border-t border-zinc-800 px-6 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="mb-7 font-mono text-[11px] uppercase tracking-widest text-zinc-600">
-            Publish to
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {platforms.map((p) => (
-              <div
-                key={p}
-                className="rounded-full border border-zinc-800 bg-zinc-900/50 px-4 py-1.5 text-sm text-zinc-400"
-              >
-                {p}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="relative z-10">
+        <PlatformMarquee />
+      </div>
 
       {/* CTA / Pricing */}
-      <section id="pricing" className="border-t border-zinc-800 px-6 py-28">
-        <div className="relative mx-auto max-w-2xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/60 p-12 text-center">
-          <div className="absolute inset-0 bg-hero-glow opacity-60" />
-          <div className="relative">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/80 px-3 py-1 text-xs text-zinc-400">
-              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-              No auto-posting — always your review first
-            </div>
-            <h2 className="mb-4 text-4xl font-bold tracking-tight">
-              Start building in public today.
-            </h2>
-            <p className="mb-8 text-zinc-400">
-              Connect one repo for free. Devlog will start turning your commits
-              into content immediately.
-            </p>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-lg bg-violet-500 px-6 py-3 font-medium text-white transition-colors hover:bg-violet-400"
-            >
-              <Github className="h-4 w-4" />
-              Get started free
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <p className="mt-4 text-xs text-zinc-600">
-              Free tier · 1 repo included · No credit card required
-            </p>
-          </div>
-        </div>
+      <section id="pricing" className="relative z-10 border-t border-white/5">
+        <PricingSection />
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-800 px-6 py-8">
+      <footer className="relative z-10 border-t border-zinc-800 px-6 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-2">
-            <div className="flex h-5 w-5 items-center justify-center rounded bg-violet-500">
-              <span className="font-mono text-[9px] font-bold text-white">DL</span>
-            </div>
-            <span className="text-sm text-zinc-500">Devlog</span>
+          <div className="flex items-center opacity-50">
+            <DevlogLogo width={100} color="#6B35D9" />
           </div>
           <p className="text-xs text-zinc-700">
             Built by developers who believe distribution is as important as code.
@@ -198,51 +140,6 @@ export default function LandingPage() {
     </div>
   );
 }
-
-const features = [
-  {
-    icon: GitBranch,
-    title: "GitHub Activity Intelligence",
-    description:
-      "Monitors commits, PRs, releases, and milestones. Focuses on meaningful product progress so content tells outcomes, not implementation details.",
-  },
-  {
-    icon: Zap,
-    title: "AI Post Generator",
-    description:
-      "Each detected event generates platform-optimized posts with the right tone for X, LinkedIn, Reddit, Indie Hackers, and dev blogs.",
-  },
-  {
-    icon: GitPullRequest,
-    title: "Dev Timeline",
-    description:
-      "An interactive timeline of your entire build journey. Review progress, track milestones, and see your output — even if you never post publicly.",
-  },
-  {
-    icon: FileText,
-    title: "Content Editor",
-    description:
-      "Review and refine every post before it goes out. Rich editing, tone adjustment, AI regeneration, and thread splitting for X.",
-  },
-  {
-    icon: CalendarDays,
-    title: "Content Calendar",
-    description:
-      "Schedule posts with drag-and-drop. Multi-platform visibility, queue management, and recurring update templates.",
-  },
-  {
-    icon: Lock,
-    title: "Privacy Controls",
-    description:
-      "Per-repo privacy levels keep your core IP private. High, medium, or low — you control exactly what detail appears in generated content.",
-  },
-  {
-    icon: BarChart3,
-    title: "Growth Analytics",
-    description:
-      "Track content performance across platforms. Engagement, impressions, follower growth, and best-performing posts at a glance.",
-  },
-];
 
 const steps = [
   {
